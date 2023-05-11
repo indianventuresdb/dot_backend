@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const address = mongoose.Schema({
+const address = new mongoose.Schema({
     houseNumber: {
         type: String,
         required: true
