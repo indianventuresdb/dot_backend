@@ -21,4 +21,6 @@ export const logout = (req, res) => { }
 
 // get profile data
 
-export const getMyProfile = (req, res) => { }
+export const getMyProfile = (req, res) => {
+    return res.status(200).json({ message: "Hello there, how are you ?" })
+}

@@ -114,6 +114,8 @@ const products = new mongoose.Schema({
         type: Number,
         default: 0
     },
+},{
+    timestamps: true
 })
 
 export const Products = mongoose.model("Products", products)

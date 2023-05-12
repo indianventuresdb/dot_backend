@@ -1,2 +1,4 @@
 
-export const setHeader = () => { }
+export const setHeader = (req, res, next) => {
+    next()
+}

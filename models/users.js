@@ -34,6 +34,8 @@ const users = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+}, {
+    timestamps: true
 })
 
 export const Users = mongoose.model("Users", users)

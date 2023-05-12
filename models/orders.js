@@ -23,6 +23,8 @@ const orders = new mongoose.Schema({
         type: Number,
         required: true
     }
+},{
+    timestamps: true
 })
 
 export const Orders = mongoose.model("Orders", orders)
