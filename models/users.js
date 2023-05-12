@@ -22,6 +22,16 @@ const users = new mongoose.Schema({
         trim: true,
         required: true,
     },
+    password: {
+        type: String,
+        required: true
+    },
+    gender: {
+        type: String,
+    },
+    dob: {
+        type: Date
+    },
     isAdmin: {
         type: Boolean,
         default: false

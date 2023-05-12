@@ -22,8 +22,24 @@ const orders = new mongoose.Schema({
     price: {
         type: Number,
         required: true
+    },
+    isOnTheWay: {
+        type: Boolean,
+        default: false
+    },
+    way: {
+        type: [String],
+        default: []
+    },
+    isDelivered: {
+        type: Boolean,
+        default: false
+    },
+    isReturned: {
+        type: Boolean,
+        default: false
     }
-},{
+}, {
     timestamps: true
 })
 
