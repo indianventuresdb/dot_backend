@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import uniqid from "uniqid"
 
 const users = new mongoose.Schema({
     firstName: {
@@ -8,6 +9,9 @@ const users = new mongoose.Schema({
     lastName: {
         type: String,
         required: true
+    },
+    profileImage: {
+        type: String
     },
     email: {
         type: String,
@@ -28,6 +32,15 @@ const users = new mongoose.Schema({
     },
     gender: {
         type: String,
+        required: true
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerifyKey: {
+        type: String,
+        default: uniqid()
     },
     dob: {
         type: Date
