@@ -32,7 +32,7 @@ const products = new mongoose.Schema({
     },
     madeIn: {
         type: String,
-        default: India
+        default: "India"
     },
     brand: {
         type: String,
@@ -106,7 +106,7 @@ const products = new mongoose.Schema({
         type: String,
         required: true
     },
-    visibilityl: {
+    visibility: {
         type: String,
         default: false
     },
