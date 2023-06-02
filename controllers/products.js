@@ -1,4 +1,3 @@
-
 const addProducts = async (req, res) => {
     const {
         productName,
