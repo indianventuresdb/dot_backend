@@ -10,7 +10,7 @@ export const isAuthenticated = async (req, res, next) => {
 
     if (!decode) {
         return res.status(json).json({ success: false, message: "you are not logged in" })
-    }
+    } 
     try {
         req.user = await Users.findById(decode._id);
     } catch (error) {

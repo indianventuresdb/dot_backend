@@ -3,7 +3,7 @@ import { register, verify, login, logout, getMyProfile } from "../controllers/us
 import { isAuthenticated } from "../middlewares/auth.js";
 import { isLoginData, isRegisterData } from "../validation/users_Validation.js";
 
-const router = express.Router();
+const router = express.Router(); 
 
 router.post("/register", isRegisterData, register);
 

@@ -3,7 +3,7 @@ import validator from 'validator';
 
 export const isRegisterData = (req, res, next) => {
     const { firstName, lastName, email, mobile, password, gender } = req.body
-    if (
+    if ( 
         validator.isEmail(email) &&
         !validator.isEmpty(firstName) &&
         !validator.isEmpty(lastName) &&

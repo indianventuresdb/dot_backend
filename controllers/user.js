@@ -101,6 +101,7 @@ export const verify = async (req, res) => {
 // User Login Controller
 // Using email
 export const login = async (req, res) => {
+    console.log("login");
     const { email, mobile, password } = req.body
     try {
         if (!email) {
