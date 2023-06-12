@@ -149,3 +149,28 @@ export const logout = (req, res) => {
 export const getMyProfile = (req, res) => {
     res.status(200).json({ success: false, user: req.user })
 }
+
+
+//all users
+app.get('/users/:id', async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const user = await Users.findOne(user => user._id === userId);
+  
+      if (!user) {
+        throw new Error('User not found');
+      }
+  
+      const userData = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        mobile: user.mobile,
+      };
+  
+      res.json(userData);
+    } catch (error) {
+      res.status(404).json({ message: error.message });
+    }
+  });
+  

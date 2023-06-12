@@ -13,6 +13,9 @@ router.post("/login", isLoginData, login,);
 
 router.get("/logout", logout);
 
+router.post("/newuser");
+
 router.get("/me", isAuthenticated, getMyProfile)
 
+router.get("/users/:id");
 export default router

@@ -1,4 +1,5 @@
 import { Orders } from '../models/orders.js';
+import {products} from '../models/products.js';
 // Create a new order
 export const createOrder = async (req, res) => {
     try {
@@ -63,12 +64,27 @@ export const createOrder = async (req, res) => {
     }
   };
   
+  //orderforSeller
+
+  export const orderforSeller=async (req,res)=>{
+    try{
+      const orders=await Orders.find();
+      orders.map(async(item)=>{
+        const product=await Product.findById(item.productId);
+        const username=await Users.findById(item.userId)
+      })
+      res.status(200).json({message:'Order deleted'});
+    }catch(error){
+       res.status(500).json({error:error.message});
+    }
+  };
 
 export default {
     createOrder,
     getOrders,
     getOrderById,
     updateOrder,
-    deleteOrder
+    deleteOrder,
+    orderforSeller
   };
   
