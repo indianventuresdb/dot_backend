@@ -149,3 +149,24 @@ export const logout = (req, res) => {
 export const getMyProfile = (req, res) => {
     res.status(200).json({ success: false, user: req.user })
 }
+
+// Users fetching for admin 
+
+export const fetchUsers = async (req, res) => {
+    const { userType } = req.params
+    try {
+        if (userType === "all" || userType === "All") {
+            const users = await Users.find();
+            if (!users) {
+                return res.status(200).json({ message: "Users not found" })
+            }
+        }
+        const users = await Users.find({ userType });
+        if (!users) {
+            return res.status(200).json({ message: "Users not found" })
+        }
+        return res.status(200).json(users)
+    } catch (error) {
+        return res.status(200).json({ message: "Failed to fetch users." })
+    }
+} 

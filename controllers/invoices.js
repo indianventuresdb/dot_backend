@@ -34,4 +34,8 @@ const getInvoiceFile = async (req, res) => {
   }
 };
 
-export { getInvoiceFile };
+const multi_Download_Invoice = async (req,res) => {
+  res.status(200).json({message:"This api is under development."})
+}
+
+export { getInvoiceFile, multi_Download_Invoice };

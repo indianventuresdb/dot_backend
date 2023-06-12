@@ -1,9 +1,9 @@
 import express from "express";
-import { register, verify, login, logout, getMyProfile } from "../controllers/user.js";
-import { isAuthenticated } from "../middlewares/auth.js";
+import { register, verify, login, logout, getMyProfile, fetchUsers } from "../controllers/user.js";
+// import { isAuthenticated } from "../middlewares/auth.js";
 import { isLoginData, isRegisterData } from "../validation/users_Validation.js";
 
-const router = express.Router(); 
+const router = express.Router();
 
 router.post("/register", isRegisterData, register);
 
@@ -13,6 +13,8 @@ router.post("/login", isLoginData, login,);
 
 router.get("/logout", logout);
 
-router.get("/me", isAuthenticated, getMyProfile)
+router.get("/me", getMyProfile)
+
+router.get("/users/:userType", fetchUsers)
 
 export default router

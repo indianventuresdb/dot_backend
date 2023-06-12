@@ -2,7 +2,7 @@
 
 import express from "express";
 import { isAuthenticated } from "../middlewares/auth.js";
-import { getInvoiceFile as downloadInvoice } from "../controllers/invoices.js";
+import { getInvoiceFile as downloadInvoice, multi_Download_Invoice } from "../controllers/invoices.js";
 
 const router = express.Router();
 
