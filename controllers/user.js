@@ -1,4 +1,4 @@
-import { Users } from "../models/Users.js";
+import { Users } from "../models/users.js";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { sendToken } from "../utils/token.js";
