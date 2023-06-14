@@ -153,15 +153,17 @@ export const getMyProfile = (req, res) => {
 // Users fetching for admin 
 
 export const fetchUsers = async (req, res) => {
-    const { userType } = req.params
+    const { adminType } = req.params
+    console.log(adminType);
     try {
-        if (userType === "all" || userType === "All") {
+        if (adminType === "all" || adminType === "All") {
             const users = await Users.find();
             if (!users) {
                 return res.status(200).json({ message: "Users not found" })
             }
+            return res.status(200).json(users)
         }
-        const users = await Users.find({ userType });
+        const users = await Users.find({ adminType });
         if (!users) {
             return res.status(200).json({ message: "Users not found" })
         }

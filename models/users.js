@@ -49,7 +49,7 @@ const users = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    userType: {
+    adminType: {
         type: String,
         default: "customer"
     },
