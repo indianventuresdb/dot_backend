@@ -1,12 +1,10 @@
 import express from "express";
 import cors from "cors";
-import connectToMongo from "./database/connectDb.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/users.js";
-import fs from "fs";
 import ordersRouter from "./routes/orders.js";
-import axios from "axios";
+import productsRouter from "./routes/products.js";
 
 // dot env configuration
 dotenv.config({ path: "./config.env" });
@@ -25,23 +23,6 @@ app.use("/api/v1/user", userRouter);
 // Use the orders router
 app.use("/api/v1/orders", ordersRouter);
 
-// const PORT = 5000;
 
-// app.listen(PORT, () => {
-//   try {
-//     connectToMongo();
-//     console.log(`Backend Listening on Port: ${PORT}`);
-//     console.log("hii");
-//   } catch (e) {
-//     console.log(e);
-//   }
-// });
-
-// // Example of using Axios to make a GET request
-// axios.post("http://localhost:5000/api/v1/user")
-//   .then(response => {
-//     console.log(response.data);
-//   })
-//   .catch(error => {
-//     console.log(error);
-//   });
+// Use the products router
+app.use("/api/v1/products", productsRouter);
