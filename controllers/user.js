@@ -154,7 +154,6 @@ export const getMyProfile = (req, res) => {
 
 export const fetchUsers = async (req, res) => {
     const { adminType } = req.params
-    console.log(adminType);
     try {
         if (adminType === "all" || adminType === "All") {
             const users = await Users.find();
