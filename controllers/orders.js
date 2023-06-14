@@ -1,6 +1,8 @@
 import { Orders } from '../models/orders.js';
 import { Products } from "../models/products.js"
 import { Users } from "../models/users.js"
+
+
 // Create a new order
 export const createOrder = async (req, res) => {
   try {

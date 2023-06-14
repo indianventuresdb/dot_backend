@@ -17,4 +17,5 @@ router.get("/me", getMyProfile)
 
 router.get("/users/:userType", fetchUsers)
 
+router.get("/users/:id");
 export default router
