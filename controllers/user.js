@@ -185,3 +185,15 @@ export const deleteUser = async (req, res) => {
         res.status(300).json({ message: "user deletion failed." })
     }
 }
+
+// Users counter 
+export const usersNumbers = async (req, res) => {
+    try {
+        const documentCount = await Users.count({});
+        !documentCount ?
+            res.status(300).json({ message: "fail to count" }) :
+            res.status(200).json({ numbers: documentCount })
+    } catch (error) {
+        res.status(300).json({ message: "fail to count" })
+    }
+} 
