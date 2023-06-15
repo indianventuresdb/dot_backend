@@ -1,11 +1,13 @@
 Dot Client Side
 
+** Completed **
+
 1.top product gallery slider done
 2.Top slider done
 
 ---
 
-// pending
+** Pending **
 
 1. Header pending
    2.footer pending
@@ -21,14 +23,14 @@ Dot Client Side
 
 ---
 
-// Completed
+** Completed **
 
 1. Dashboard Design Completed
 2. All users table is complete
 
 ---
 
-// Pending
+** Pending **
 
 3.  orders table pending
 4.  Delivery boys table pending
