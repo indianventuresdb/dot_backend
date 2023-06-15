@@ -170,6 +170,7 @@ const getProducts = async (req, res) => {
 
 // serach products
 const searchProducts = async (req, res) => {
+        const {searchString} =req.params;
         
 }
 

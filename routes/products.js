@@ -9,6 +9,6 @@ router.post("/add_product", addProducts);
 router.delete("/remove_product/:id/:productId", removeProducts);
 router.put("/update_product/:id/:productId",  updateProducts);
 router.get("/get_all_Products", getProducts);
-router.get("/search", searchProducts);
+router.get("/search/:searchString", searchProducts);
 
 export default router;

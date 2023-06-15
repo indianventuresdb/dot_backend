@@ -170,4 +170,18 @@ export const fetchUsers = async (req, res) => {
     } catch (error) {
         return res.status(200).json({ message: "Failed to fetch users." })
     }
-} 
+}
+
+
+// delete user 
+export const deleteUser = async (req, res) => {
+    const { userId } = req.params
+    try {
+        const user = await Users.findByIdAndDelete(userId)
+        !user ?
+            res.status(300).json({ message: "user deletion failed." }) :
+            res.status(200).json({ message: "user deleted successfully." })
+    } catch (error) {
+        res.status(300).json({ message: "user deletion failed." })
+    }
+}
