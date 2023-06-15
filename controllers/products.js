@@ -170,8 +170,22 @@ const getProducts = async (req, res) => {
 
 // serach products
 const searchProducts = async (req, res) => {
-        const {searchString} =req.params;
-        
+    const { searchString } = req.params;
+
 }
 
-export { addProducts, removeProducts, updateProducts, getProducts, searchProducts }
+// get one product
+const getOneProduct = async (req, res) => {
+    const { productId } = req.params
+    try {
+        const product = await Products.findById(productId)
+        !product ?
+            res.status(404).json({ message: "Product not found erorr 404" }) :
+            res.status(200).json(product);
+    } catch (error) {
+        res.status(404).json({ message: "Product not found erorr 404" })
+    }
+}
+
+
+export { addProducts, removeProducts, updateProducts, getProducts, searchProducts, getOneProduct }
