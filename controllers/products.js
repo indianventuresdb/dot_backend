@@ -147,6 +147,7 @@ const updateProducts = async (req, res) => {
             description,
         });
         // Turnory Oprator
+        console.log(product)
         !product ?
             res.status(300).json({ message: "Product can not updated" }) :
             res.status(200).json({ message: "Product updated successfully" })
