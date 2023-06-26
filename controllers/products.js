@@ -172,7 +172,19 @@ const getProducts = async (req, res) => {
 // serach products
 const searchProducts = async (req, res) => {
     const { searchString } = req.params;
-
+    try {
+        const products = await Products.find({
+            $or: [
+                { productName: { $regex: searchString, $options: 'i' } },
+                { tags: { $regex: searchString, $options: 'i' } },
+            ],
+        });
+        !products ?
+            res.status(300).json({ message: "Product not found" }) :
+            res.status(300).json(products);
+    } catch (error) {
+        return res.status(300).json({ message: "Product not found" })
+    }
 }
 
 // get one product

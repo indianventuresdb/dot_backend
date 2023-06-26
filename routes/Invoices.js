@@ -6,5 +6,7 @@ import { getInvoiceFile as downloadInvoice, multi_Download_Invoice } from "../co
 
 const router = express.Router();
 
-router.get("/download_Invoice/:order_Id", isAuthenticated, downloadInvoice);
+router.get("/download_Invoice/:order_Id", downloadInvoice);
 router.get("/multiple_Download_Invoices", isAuthenticated, multi_Download_Invoice);
+
+export default router 

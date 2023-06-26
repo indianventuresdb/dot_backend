@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import userRouter from "./routes/users.js";
 import ordersRouter from "./routes/orders.js";
 import productsRouter from "./routes/products.js";
+import invoice from "./routes/Invoices.js";
 
 // dot env configuration
 dotenv.config({ path: "./config.env" });
@@ -26,3 +27,7 @@ app.use("/api/v1/orders", ordersRouter);
 
 // Use the products router
 app.use("/api/v1/products", productsRouter);
+
+
+// Use the products router
+app.use("/api/v1/invoice", invoice);

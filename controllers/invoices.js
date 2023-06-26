@@ -4,10 +4,10 @@ import path from "path";
 
 const getInvoiceFile = async (req, res) => {
   try {
-    const { orders_Id } = req.params;
-
+    const { order_Id } = req.params;
     // Retrieve the file name from the MongoDB database
-    const order = await Orders.findById(orders_Id);
+    const order = await Orders.findOne({ _id: order_Id });
+    console.log(order)
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -34,8 +34,8 @@ const getInvoiceFile = async (req, res) => {
   }
 };
 
-const multi_Download_Invoice = async (req,res) => {
-  res.status(200).json({message:"This api is under development."})
+const multi_Download_Invoice = async (req, res) => {
+  res.status(200).json({ message: "This api is under development." })
 }
 
 export { getInvoiceFile, multi_Download_Invoice };

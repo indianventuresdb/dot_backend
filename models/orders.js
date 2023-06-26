@@ -18,6 +18,10 @@ const orders = new mongoose.Schema({
         type: String,
         required: true
     },
+    invoiceFileName: {
+        type: String,
+        required: true
+    },
     price: {
         type: Number,
         required: true
