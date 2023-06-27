@@ -86,10 +86,13 @@ export const ordersForSeller = async (req, res) => {
 }
 
 
-export default {
-  createOrder,
-  getOrders,
-  getOrderById,
-  updateOrder,
-  deleteOrder
-};
+export const ordersNumbers = async (req, res) => {
+  try {
+    const documentCount = await Orders.count({});
+    !documentCount ?
+      res.status(300).json({ message: "fail to count" }) :
+      res.status(200).json({ numbers: documentCount })
+  } catch (error) {
+    res.status(300).json({ message: "fail to count" })
+  }
+}
