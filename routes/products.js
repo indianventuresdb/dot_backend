@@ -7,7 +7,8 @@ import {
     updateProducts,
     getProducts,
     searchProducts,
-    getOneProduct
+    getOneProduct,
+    productNumbers
 } from "../controllers/products.js";
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.put("/update_product/:id/:productId", updateProducts);
 router.get("/get_all_Products", getProducts);
 router.get("/search/:searchString", searchProducts);
 router.get("/product/:productId", getOneProduct);
+router.get("/count", productNumbers);
 
 export default router;

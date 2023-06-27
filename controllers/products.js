@@ -201,4 +201,15 @@ const getOneProduct = async (req, res) => {
 }
 
 
-export { addProducts, removeProducts, updateProducts, getProducts, searchProducts, getOneProduct }
+const productNumbers = async (req, res) => {
+    try {
+        const documentCount = await Products.count({});
+        !documentCount ?
+            res.status(300).json({ message: "fail to count" }) :
+            res.status(200).json({ numbers: documentCount })
+    } catch (error) {
+        res.status(300).json({ message: "fail to count" })
+    }
+}
+
+export { addProducts, removeProducts, updateProducts, getProducts, searchProducts, getOneProduct, productNumbers }
