@@ -1,5 +1,5 @@
 import express from 'express';
-// import { isAuthenticated } from '../middlewares/auth.js';
+import { isAuthenticated } from '../middlewares/auth.js';
 import { createOrder, getOrders, getOrderById, updateOrder, deleteOrder, ordersNumbers } from '../controllers/orders.js';
 
 const router = express.Router();
@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/orders', createOrder);
 
 // Get all orders
-router.get('/orders', getOrders);
+router.get('/orders', isAuthenticated, getOrders);
 
 // Get a single order by ID
 router.get('/orders/:id', getOrderById);

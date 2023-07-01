@@ -5,7 +5,7 @@ import { isLoginData, isRegisterData } from "../validation/users_Validation.js";
 
 const router = express.Router();
 
-router.post("/register", isRegisterData, register);
+router.post("/register", register);
 
 router.post("/login", isLoginData, login);
 

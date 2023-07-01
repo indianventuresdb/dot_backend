@@ -7,6 +7,7 @@ import { sendToken } from "../utils/token.js";
 
 export const register = async (req, res) => {
     const { firstName, lastName, email, mobile, password, gender } = req.body
+    console.log(firstName, lastName, email, mobile, password, gender);
     try {
         const user = await Users.findOne({ email })
         if (!user) {

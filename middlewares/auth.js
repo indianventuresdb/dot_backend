@@ -1,21 +1,22 @@
 import jwt from "jsonwebtoken";
+import { Users } from "../models/users.js";
+
 export const isAuthenticated = async (req, res, next) => {
     const { token } = req.cookies
     console.log(req.cookies)
     if (!token) {
-        return res.status(300).json({ success: false, message: "you are not logged in" })
+        return res.redirect("/login.html");
     }
 
     const decode = jwt.verify(token, process.env.JWT_SECRET)
 
     if (!decode) {
-        return res.status(json).json({ success: false, message: "you are not logged in" })
-    } 
+        return res.redirect("/login.html");
+    }
     try {
         req.user = await Users.findById(decode._id);
     } catch (error) {
-        res.status(404).json({ status: false, message: "Invalid Authentication token" })
+        return res.redirect("/login.html");
     }
-
     next()
 }

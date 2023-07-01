@@ -10,6 +10,7 @@ import { logger } from "./middlewares/logger.js";
 import multer from "multer"
 import { pathToUrl } from "./utils/pathToUrl.js";
 import fileSender from "./routes/files.js";
+import who_i_am from "./routes/who_i_am.js"
 
 // dot env configuration
 dotenv.config({ path: "./config.env" });
@@ -37,6 +38,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage })
 
 // Use the user router
+app.use("/api/v1/indentifier", who_i_am);
+
+// Use the user router
 app.use("/api/v1/user", userRouter);
 
 // Use the orders router
@@ -54,8 +58,5 @@ app.use("/files", fileSender);
 
 // file Uploader
 app.post("/upload", upload.single("file"), (req, res) => {
-  console.log(req.body);
-  console.log(req.file);
-
   return res.status(200).json({ fileName: pathToUrl(req.file.path) })
 })
