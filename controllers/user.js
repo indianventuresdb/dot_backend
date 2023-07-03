@@ -1,13 +1,27 @@
 import { Users } from "../models/users.js";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
-import { sendToken } from "../utils/token.js";
+import jwt from "jsonwebtoken";
+
+
+
+const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+
+    res.status(statusCode).cookie("token", token, {
+        maxAge: 120 * 60 * 1000,
+        path: "/"
+    }).json({
+        success: true,
+        message: `${message} ${loggedBy}`
+    });
+}
+
 
 // User Register Controller
 
 export const register = async (req, res) => {
     const { firstName, lastName, email, mobile, password, gender } = req.body
-    console.log(firstName, lastName, email, mobile, password, gender);
     try {
         const user = await Users.findOne({ email })
         if (!user) {
@@ -64,7 +78,7 @@ export const register = async (req, res) => {
                     });
 
                     // email sent
-                    sendToken(user, res, "Account Created successfully. Please check your email and verify your account.")
+                    sendToken(user, res, "Account Created successfully. Please check your email and verify your account.", 200)
                 }
             }
         } else {
@@ -100,41 +114,47 @@ export const verify = async (req, res) => {
 
 
 // User Login Controller
-// Using email
+
 export const login = async (req, res) => {
-    console.log("login");
-    const { email, mobile, password } = req.body
+    const { email, mobile, password } = req.body;
     try {
         if (!email) {
-            const user = await Users.findOne({ mobile })
+            const user = await Users.findOne({ mobile });
             if (!user) {
-                return res.status(500).json({ status: false, message: "mobile number or password incorrect." })
+                return res.status(500).json({ status: false, message: "Mobile number or password incorrect." });
             }
-            const verifyPassword = bcrypt.compare(password, user.password)
+            const verifyPassword = await bcrypt.compare(password, user.password);
             if (!verifyPassword) {
-                return res.status(500).json({ status: false, message: "mobile number or password incorrect." })
+                return res.status(500).json({ status: false, message: "Mobile number or password incorrect." });
             }
             if (!user.isEmailVerified) {
-                return res.status(200).json({ status: true, message: "Your account is not verified please check your email and verify your account." })
+                return res.status(200).json({ status: true, message: "Your account is not verified. Please check your email and verify your account." });
             }
-            sendToken(user, res, "message: Login successfull loggedBy: Mobile number")
+            sendToken(user, res, "Login successful", 200, "loggedBy: Mobile number");
+        } else {
+            const user = await Users.findOne({ email }).select("+password");
+            if (!user) {
+                return res.status(500).json({ status: false, message: "Email or password incorrect." });
+            }
+            
+            console.log(138, email);
+            const verifyPassword = await bcrypt.compare(password, user.password);
+            console.log(verifyPassword, user.password);
+            if (!verifyPassword) {
+                return res.status(500).json({ status: false, message: "Email or password incorrect." });
+            }
+            if (!user.isEmailVerified) {
+                return res.status(200).json({ status: true, message: "Your account is not verified. Please check your email and verify your account." });
+            }
+            sendToken(user, res, "Login successful", 200, "loggedBy: Email");
         }
-        const user = await Users.findOne({ email })
-        if (!user) {
-            return res.status(500).json({ status: false, message: "email or password incorrect." })
-        }
-        const verifyPassword = bcrypt.compare(password, user.password)
-        if (!verifyPassword) {
-            return res.status(500).json({ status: false, message: "email or password incorrect." })
-        }
-        if (!user.isEmailVerified) {
-            return res.status(200).json({ status: true, message: "Your account is not verified please check your email and verify your account." })
-        }
-        sendToken(user, res, "message: Login successfull loggedBy: Email")
     } catch (error) {
-        return res.status(500).json({ status: false, message: "Internal Server ERROR" })
+        return res.status(500).json({ status: false, message: "Internal Server Error" });
     }
-}
+};
+
+
+
 
 
 // user Logout
