@@ -5,7 +5,7 @@ export const who_i_am = async (req, res, next) => {
     const { token } = req.cookies;
 
     if (!token) {
-        return res.redirect("/loginfirst");
+        return res.status(200).json({type:"notLogin"})
     }
 
     try {
@@ -14,19 +14,19 @@ export const who_i_am = async (req, res, next) => {
 
         switch (req.user.adminType) {
             case "admin":
-                res.redirect("/admin");
+                res.status(200).json({ type: "admin" });
                 break;
             case "accountant":
-                res.redirect("/accounts");
+                res.status(200).json({ type: "accountant" });
                 break;
             case "delivery":
-                res.redirect("/delivery");
+                res.status(200).json({ type: "delivery" });
                 break;
             case "customer":
-                res.redirect("/customer");
+                res.status(200).json({ type: "customer" });
                 break;
             default:
-                res.redirect("/login");
+                res.status(200).json({type:"notLogin"})
                 break;
         }
     } catch (error) {

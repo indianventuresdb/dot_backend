@@ -1,5 +1,5 @@
 import express from "express";
-import { register, verify, login, logout, getMyProfile, fetchUsers, deleteUser, usersNumbers } from "../controllers/user.js";
+import { register, verify, login, loginAdmin, logout, getMyProfile, fetchUsers, deleteUser, usersNumbers } from "../controllers/user.js";
 // import { isAuthenticated } from "../middlewares/auth.js";
 import { isLoginData, isRegisterData } from "../validation/users_Validation.js";
 
@@ -7,7 +7,9 @@ const router = express.Router();
 
 router.post("/register", register);
 
-router.post("/login", isLoginData, login);
+router.post("/login", login);
+
+router.post("/login_admin", loginAdmin);
 
 router.delete("/delete/:userId", deleteUser);
 

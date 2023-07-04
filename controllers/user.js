@@ -11,10 +11,15 @@ const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
     res.status(statusCode).cookie("token", token, {
         maxAge: 120 * 60 * 1000,
         path: "/"
-    }).json({
-        success: true,
-        message: `${message} ${loggedBy}`
-    });
+    }).json({ path: "http://localhost:3000" });
+}
+const sendTokenAdmin = (user, res, path, statusCode = 200) => {
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+
+    res.status(statusCode).cookie("token", token, {
+        maxAge: 120 * 60 * 1000,
+        path: "/"
+    }).json({ path });
 }
 
 
@@ -151,7 +156,60 @@ export const login = async (req, res) => {
 };
 
 
+// User Login Controller
 
+export const loginAdmin = async (req, res) => {
+    const { email, mobile, password } = req.body;
+    try {
+        if (!email) {
+            const user = await Users.findOne({ mobile });
+            if (!user) {
+                return res.status(500).json({ status: false, message: "Mobile number or password incorrect." });
+            }
+            const verifyPassword = await bcrypt.compare(password, user.password);
+            if (!verifyPassword) {
+                return res.status(500).json({ status: false, message: "Mobile number or password incorrect." });
+            }
+            if (!user.isEmailVerified) {
+                return res.status(200).json({ status: true, message: "Your account is not verified. Please check your email and verify your account." });
+            }
+            sendTokenAdmin(user, res, user.adminType === "admin" ?
+                "dashboard" :
+                user.adminType === "seller" ?
+                    "seller" :
+                    user.adminType === "delivery" ?
+                        "delivery" :
+                        user.adminType === "accountant" ?
+                            "accountant" :
+                            "/",
+                200);
+        } else {
+            const user = await Users.findOne({ email }).select("+password");
+            if (!user) {
+                return res.status(500).json({ status: false, message: "Email or password incorrect." });
+            }
+            const verifyPassword = await bcrypt.compare(password, user.password);
+            if (!verifyPassword) {
+                return res.status(500).json({ status: false, message: "Email or password incorrect." });
+            }
+            if (!user.isEmailVerified) {
+                return res.status(200).json({ status: true, message: "Your account is not verified. Please check your email and verify your account." });
+            }
+            sendTokenAdmin(user, res, user.adminType === "admin" ?
+                "dashboard" :
+                user.adminType === "seller" ?
+                    "seller" :
+                    user.adminType === "delivery" ?
+                        "delivery" :
+                        user.adminType === "accountant" ?
+                            "accountant" :
+                            "/",
+                200);
+        }
+    } catch (error) {
+        return res.status(500).json({ status: false, message: "Internal Server Error" });
+    }
+};
 
 
 // user Logout
