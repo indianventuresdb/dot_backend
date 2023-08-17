@@ -1,5 +1,0 @@
-MONGO_URI=mongodb://127.0.0.1:27017
-PORT=4000
-JWT_SECRET=saldjklaskdjsioadsadnmsandasmdnasajskja
-USER_E_MAIL=garudasofttech0@gmail.com
-USER_PASS=nnkknkyznyyadocf
