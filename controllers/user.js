@@ -6,13 +6,14 @@ const jwt = require("jsonwebtoken");
 const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
 
+  console.log(token);
   res
     .status(statusCode)
     .cookie("token", token, {
       maxAge: 120 * 60 * 1000,
       path: "/",
     })
-    .json({ path: "http://localhost:3000" });
+    .json({ status: true, message: "Logged In Succsfully" });
 };
 
 const sendTokenAdmin = (user, res, path, statusCode = 200) => {
@@ -100,7 +101,7 @@ exports.register = async (req, res) => {
       }
     } else {
       return res
-        .status(200)
+        .status(300)
         .json({ status: false, message: "User already registered." });
     }
   } catch (error) {
@@ -166,16 +167,16 @@ exports.login = async (req, res) => {
   const verifyPassword = await bcrypt.compare(password, user.password);
   if (!verifyPassword) {
     return res
-      .status(500)
+      .status(300)
       .json({ status: false, message: "Email or password incorrect." });
   }
-  if (!user.isEmailVerified) {
-    return res.status(200).json({
-      status: true,
-      message:
-        "Your account is not verified. Please check your email and verify your account.",
-    });
-  }
+  // if (!user.isEmailVerified) {
+  //   return res.status(200).json({
+  //     status: true,
+  //     message:
+  //       "Your account is not verified. Please check your email and verify your account.",
+  //   });
+  // }
   sendToken(user, res, "Login successful", 200, "loggedBy: Email");
 };
 
