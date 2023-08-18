@@ -17,8 +17,6 @@ const fileSender = require("./routes/files.js");
 const who_i_am = require("./routes/who_i_am.js");
 const { Slides } = require("./models/slider.js");
 
-
-
 // dot env configuration
 dotenv.config({ path: "./config.env" });
 
@@ -45,7 +43,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-
 // Use the user router
 app.use("/api/v1/indentifier", who_i_am);
 
@@ -59,7 +56,7 @@ app.use("/api/v1/orders", ordersRouter);
 app.use("/api/v1/products", productsRouter);
 
 // Use the products router
-app.use("/api/v1/payment", productsRouter);
+app.use("/api/v1/payment", paymentRouter);
 
 // Use the Invoice router
 app.use("/api/v1/invoice", invoice);
@@ -78,13 +75,13 @@ app.post("/upload/:type", upload.single("file"), async function (req, res) {
   } else if (type === "slide") {
     try {
       const filePath = pathToUrl(req.file.path);
-      const file = await Slides.findOne({ slidePath: filePath })
+      const file = await Slides.findOne({ slidePath: filePath });
       if (file) {
         return res.status(300).json({ message: "File already uploaded." });
       } else {
         const file = await Slides.create({ slidePath: filePath });
         if (file) {
-          return res.status(200).json({ filePath })
+          return res.status(200).json({ filePath });
         } else {
           return res.status(301).json({ message: "File not uploaded" });
         }
@@ -94,26 +91,25 @@ app.post("/upload/:type", upload.single("file"), async function (req, res) {
       return res.status(302).json({ message: "File not uploaded" });
     }
   } else {
-    return res.status(404).json({ message: "not found" })
+    return res.status(404).json({ message: "not found" });
   }
 });
 
 // Delete file from the upload directory
-app.delete('/files/delete/:filename', (req, res) => {
+app.delete("/files/delete/:filename", (req, res) => {
   const fileName = req.params.filename;
   console.log(fileName);
-  const filePath = path.join(__dirname, 'uploads', fileName);
-  console.log(filePath)
+  const filePath = path.join(__dirname, "uploads", fileName);
+  console.log(filePath);
   fs.unlink(filePath, (err) => {
     if (err) {
       console.error(err);
-      res.status(500).send('Failed to delete the file.');
+      res.status(500).send("Failed to delete the file.");
     } else {
       res.status(200).json({ message: "File deleted successfully." });
     }
   });
 });
-
 
 // Export the app
 module.exports = { app };
