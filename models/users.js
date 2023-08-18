@@ -2,16 +2,9 @@ const mongoose = require('mongoose');
 const uniqid = require('uniqid');
 
 const users = new mongoose.Schema({
-    firstName: {
+    name: {
         type: String,
         required: true
-    },
-    lastName: {
-        type: String,
-        required: true
-    },
-    profileImage: {
-        type: String
     },
     email: {
         type: String,
@@ -20,7 +13,7 @@ const users = new mongoose.Schema({
         trim: true,
         required: true,
     },
-    mobile: {
+    phone: {
         type: String,
         unique: true,
         trim: true,
@@ -31,10 +24,6 @@ const users = new mongoose.Schema({
         required: true,
         select: false
     },
-    gender: {
-        type: String,
-        required: true
-    },
     isEmailVerified: {
         type: Boolean,
         default: false
@@ -42,9 +31,6 @@ const users = new mongoose.Schema({
     emailVerifyKey: {
         type: String,
         default: uniqid()
-    },
-    dob: {
-        type: Date
     },
     isAdmin: {
         type: Boolean,
