@@ -5,6 +5,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const userRouter = require("./routes/users.js");
+const paymentRouter = require("./routes/payment.js");
 const ordersRouter = require("./routes/orders.js");
 const productsRouter = require("./routes/products.js");
 const sliderRouter = require("./routes/slider.js");
@@ -56,6 +57,9 @@ app.use("/api/v1/orders", ordersRouter);
 
 // Use the products router
 app.use("/api/v1/products", productsRouter);
+
+// Use the products router
+app.use("/api/v1/payment", productsRouter);
 
 // Use the Invoice router
 app.use("/api/v1/invoice", invoice);
