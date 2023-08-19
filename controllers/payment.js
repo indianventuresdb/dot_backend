@@ -1,24 +1,22 @@
 const Razorpay = require("razorpay");
 
 var instance = new Razorpay({
-  key_id: `${process.env.RAZORPAY_API_KEY}`,
-  key_secret: process.env.RAZORPAY_API_SECRET,
+  key_id: "rzp_test_ONvCLFgJgnsaYT",
+  key_secret: "obbG2E3S0JZTAItexNYsJEP6",
 });
 
 exports.checkOut = async (req, res) => {
   try {
     const options = {
-      amount: 5000,
+      amount: 95590 * 100,
       currency: "INR",
-      receipt: "randomNumber",
+      receipt: "surendra.singh.kamboj@hotmail.com",
     };
+
     const order = await instance.orders.create(options);
-    order ? console.log(order) : null;
-    res.status(200).json({ success: true, order });
+    order ? res.status(200).json({ success: true, order }) : null;
   } catch (error) {
-    console.error("Error creating order:", error);
-    res.status(401).json({
-      success: false,
-    });
+    console.log(error);
+    res.status(400).json({ success: false, message: "Order can not create." });
   }
 };

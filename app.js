@@ -18,6 +18,7 @@ const who_i_am = require("./routes/who_i_am.js");
 const { Slides } = require("./models/slider.js");
 
 // dot env configuration
+dotenv.config();
 dotenv.config({ path: "./config.env" });
 
 // Create an express instance

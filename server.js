@@ -1,3 +1,4 @@
+console.clear();
 const { app } = require("./app.js");
 const connectDb = require("./database/connectDb.js");
 
