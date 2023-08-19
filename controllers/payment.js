@@ -20,3 +20,9 @@ exports.checkOut = async (req, res) => {
     res.status(400).json({ success: false, message: "Order can not create." });
   }
 };
+
+exports.verifyPayment = async (req, res) => {};
+
+exports.getKey = (req, res) => {
+  res.status(200).json({ key: process.env.RAZORPAY_ID_KEY });
+};
