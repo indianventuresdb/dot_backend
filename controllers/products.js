@@ -131,7 +131,7 @@ const searchProducts = async (req, res) => {
     });
     !products
       ? res.status(300).json({ message: "Product not found" })
-      : res.status(300).json(products);
+      : res.status(200).json(products);
   } catch (error) {
     return res.status(300).json({ message: "Product not found" });
   }
