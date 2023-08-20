@@ -6,6 +6,8 @@ const addProducts = async (req, res) => {
     productType,
     shortDescription,
     tags,
+    category,
+    color,
     hsnCode,
     isCodAllowed,
     isReturnAble,
@@ -18,12 +20,18 @@ const addProducts = async (req, res) => {
     DetailedDescription,
     visibility,
   } = req.body;
+
+  let discount = ((mrp - offeredPrice) / mrp) * 100;
+
   try {
     const product = await Products.create({
       productName,
       productType,
       shortDescription,
       tags,
+      category,
+      color,
+      discount,
       hsnCode,
       isCodAllowed,
       isReturnAble,
@@ -67,6 +75,8 @@ const updateProducts = async (req, res) => {
     productType,
     shortDescription,
     tags,
+    category,
+    color,
     hsnCode,
     isCodAllowed,
     isReturnAble,
@@ -79,6 +89,9 @@ const updateProducts = async (req, res) => {
     DetailedDescription,
     visibility,
   } = req.body;
+
+  let discount = ((mrp - offeredPrice) / mrp) * 100;
+
   try {
     const product = await Products.findByIdAndUpdate(productId, {
       productName,
@@ -86,6 +99,9 @@ const updateProducts = async (req, res) => {
       shortDescription,
       tags,
       hsnCode,
+      category,
+      color,
+      discount,
       isCodAllowed,
       isReturnAble,
       isCancelAble,
