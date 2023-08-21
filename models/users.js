@@ -34,7 +34,7 @@ const users = new mongoose.Schema(
       default: uniqid(),
     },
     phone_OTP: {
-      type: Number,
+      type: String,
       required: true,
     },
     isAdmin: {

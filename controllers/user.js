@@ -58,7 +58,7 @@ exports.register = async (req, res) => {
           name,
           email,
           phone,
-          phone_OTP,
+          phone_OTP:phone_OTP.toString(),
           password: hashedPassword,
         });
         if (user) {
