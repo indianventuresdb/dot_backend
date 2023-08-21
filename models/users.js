@@ -25,6 +25,9 @@ const users = new mongoose.Schema(
       required: true,
       select: false,
     },
+    image: {
+      type: String,
+    },
     isEmailVerified: {
       type: Boolean,
       default: false,
