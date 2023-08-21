@@ -1,19 +1,25 @@
 const { Users } = require("../models/users.js");
 const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
+const generateOTP = require("../utils/otpGenerator.js");
+const { sendSMS } = require("../utils/smsSender.js");
 
-const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
+const sendToken = (
+  user,
+  res,
+  message,
+  otp,
+  statusCode = 200,
+  loggedBy = null
+) => {
   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-
-  console.log(token);
   res
     .status(statusCode)
     .cookie("token", token, {
       maxAge: 120 * 60 * 1000,
       path: "/",
     })
-    .json({ status: true, message: "Logged In Succsfully" });
+    .json({ status: true, message, otp });
 };
 
 const sendTokenAdmin = (user, res, path, statusCode = 200) => {
@@ -31,70 +37,36 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
 // User Register Controller
 exports.register = async (req, res) => {
   const { name, email, phone, password } = req.body;
-
+  const phone_OTP = generateOTP();
+  const data = {
+    Text: `User Admin login OTP is ${phone_OTP} - SMSCOU`,
+    Number: `${phone}`,
+    SenderId: "SMSCOU",
+    DRNotifyUrl: process.env.NOTIFY_HANDLER,
+    DRNotifyHttpMethod: "POST",
+    Tool: "API",
+  };
   try {
-    const user = await Users.findOne({ email });
+    const user = await Users.findOne({ phone });
     if (!user) {
       const hashedPassword = await bcrypt.hash(password, 10);
       if (hashedPassword) {
+        // Sending Verification otp to the User
+        const otp = await sendSMS(res, data);
+        // Otp sent
         const user = await Users.create({
           name,
           email,
           phone,
+          phone_OTP,
           password: hashedPassword,
         });
         if (user) {
-          // Sending Email to the User
-          const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-              user: process.env.USER_E_MAIL,
-              pass: process.env.USER_PASS,
-            },
-          });
-          const mailOptions = {
-            from: process.env.USER_E_MAIL,
-            to: email,
-            subject: "Verify your account.",
-            html: `<link
-                            rel="stylesheet"
-                            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-                            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-                            crossorigin="anonymous"
-                        />
-                        <h3 class="text-center">Hi ${name},</h3>
-                        <div class="container mx-auto">
-                            <div class="row justify-content-center text-center">
-                                <div class="col-md-6">
-                                    <p>
-                                        Welcome to DOT, please click the button below to verify your account:
-                                    </p>
-                                    <div>
-                                        <a
-                                            class="btn btn-primary"
-                                            href="http://localhost:${process.env.PORT}/api/v1/user/verify/${user._id}/${user.emailVerifyKey}"
-                                        >
-                                            Verify Now
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        `,
-          };
-          transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-              console.log(error);
-            } else {
-              console.log("Email sent: " + info.response);
-            }
-          });
-
-          // email sent
           sendToken(
             user,
             res,
             "Account Created successfully. Please check your email and verify your account.",
+            otp,
             200
           );
         }
