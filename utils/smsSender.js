@@ -1,4 +1,4 @@
-async function sendSMS(res, data) {
+async function sendSMS(data) {
   try {
     const url = `https://restapi.smscountry.com/v0.1/Accounts/${process.env.SMS_AUTH_KEY}/SMSes/`;
 
@@ -15,15 +15,14 @@ async function sendSMS(res, data) {
 
     if (!response.ok) {
       res.status(300).json({ success: false });
-      throw new Error("Network response was not ok");
+      return { success: false };
     }
 
     const responseData = await response.json();
 
     return { success: true, data: responseData };
   } catch (error) {
-    res.status(300).json({ success: false });
-    throw error;
+    return { success: false };
   }
 }
 
