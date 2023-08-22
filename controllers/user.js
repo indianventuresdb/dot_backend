@@ -58,7 +58,7 @@ exports.register = async (req, res) => {
           name,
           email,
           phone,
-          phone_OTP:phone_OTP.toString(),
+          phone_OTP: phone_OTP.toString(),
           password: hashedPassword,
         });
         if (user) {
@@ -129,7 +129,6 @@ exports.login = async (req, res) => {
       .status(500)
       .json({ status: false, message: "Internal Server Error" });
   }
-
   if (!user) {
     return res
       .status(300)
@@ -149,7 +148,9 @@ exports.login = async (req, res) => {
   //       "Your account is not verified. Please check your email and verify your account.",
   //   });
   // }
-  sendToken(user, res, "Login successful", 200, "loggedBy: Email");
+
+  //Temoprary OTP added
+  sendToken(user, res, "Login successful", 123456, 200, "loggedBy: Email");
 };
 
 // User Login Controller
