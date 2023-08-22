@@ -8,7 +8,7 @@ const {
   getProducts,
   searchProducts,
   getOneProduct,
-  productNumbers
+  productNumbers,
 } = require("../controllers/products.js");
 
 const router = express.Router();

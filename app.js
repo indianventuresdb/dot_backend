@@ -11,11 +11,11 @@ const productsRouter = require("./routes/products.js");
 const sliderRouter = require("./routes/slider.js");
 const invoice = require("./routes/Invoices.js");
 const { logger } = require("./middlewares/logger.js");
-const multer = require("multer");
 const { pathToUrl } = require("./utils/pathToUrl.js");
 const fileSender = require("./routes/files.js");
 const who_i_am = require("./routes/who_i_am.js");
 const { Slides } = require("./models/slider.js");
+const multer = require("multer");
 
 // dot env configuration
 dotenv.config();

@@ -1,65 +1,61 @@
-const mongoose = require('mongoose');
-const uniqid = require('uniqid');
+const mongoose = require("mongoose");
+const uniqid = require("uniqid");
 
-const users = new mongoose.Schema({
-    firstName: {
-        type: String,
-        required: true
-    },
-    lastName: {
-        type: String,
-        required: true
-    },
-    profileImage: {
-        type: String
+const users = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
     },
     email: {
-        type: String,
-        unique: true,
-        lowercase: true,
-        trim: true,
-        required: true,
+      type: String,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      required: true,
     },
-    mobile: {
-        type: String,
-        unique: true,
-        trim: true,
-        required: true,
+    phone: {
+      type: String,
+      unique: true,
+      trim: true,
+      required: true,
     },
     password: {
-        type: String,
-        required: true,
-        select: false
+      type: String,
+      required: true,
+      select: false,
     },
-    gender: {
-        type: String,
-        required: true
+    image: {
+      type: String,
     },
     isEmailVerified: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     emailVerifyKey: {
-        type: String,
-        default: uniqid()
+      type: String,
+      default: uniqid(),
     },
-    dob: {
-        type: Date
+    phone_OTP: {
+      type: String,
+      required: true,
     },
     isAdmin: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     adminType: {
-        type: String,
-        default: "customer"
+      type: String,
+      default: "customer",
     },
     isSeller: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
-}, {
-    timestamps: true
-});
+  },
+  {
+    timestamps: true,
+  }
+);
 
 exports.Users = mongoose.model("Users", users);
