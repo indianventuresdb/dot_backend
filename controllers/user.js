@@ -19,7 +19,7 @@ const sendToken = (
       maxAge: 120 * 60 * 1000,
       path: "/",
     })
-    .json({ status: true, message, otp });
+    .json({ status: true, message, otp, id: user._id });
 };
 
 const sendTokenAdmin = (user, res, path, statusCode = 200) => {
@@ -65,10 +65,15 @@ exports.register = async (req, res) => {
           sendToken(
             user,
             res,
-            "Account Created successfully. Please check your email and verify your account.",
+            "Account Created successfully. Please check your phone and verify your account.",
             otp,
             200
           );
+        } else {
+          return res.status(500).json({
+            status: false,
+            message: "Database server failed, Please try again.",
+          });
         }
       }
     } else {
@@ -89,7 +94,8 @@ exports.register = async (req, res) => {
 
 // User account verify Controller
 exports.verify = async (req, res) => {
-  const { id, key } = req.params;
+  const { id, otp } = req.params;
+
   try {
     const user = await Users.findById(id);
     if (!user) {
@@ -97,16 +103,22 @@ exports.verify = async (req, res) => {
         .status(300)
         .json({ status: false, message: "Account not Registered." });
     }
-    if (user.isEmailVerified) {
+    if (user.isPhoneVerified) {
       return res
         .status(300)
         .json({ status: false, message: "Account already verified." });
     }
-    if (user.emailVerifyKey === key) {
-      await Users.findOneAndUpdate({ _id: id }, { isEmailVerified: true });
+    console.log(user.phone_OTP + " " + otp);
+    if (user.phone_OTP === otp) {
+      await Users.findOneAndUpdate({ _id: id }, { isPhoneVerified: true });
       return res.status(200).json({
         status: true,
         message: `Congratulations ${user.name}, Your account Verified successfully.`,
+      });
+    } else {
+      return res.status(200).json({
+        status: false,
+        message: `Sorry ${user.name}, You have entered wrong otp`,
       });
     }
   } catch (error) {
@@ -119,7 +131,6 @@ exports.verify = async (req, res) => {
 // User Login Controller
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  console.log(email + " " + password);
 
   let user;
   try {
@@ -141,15 +152,16 @@ exports.login = async (req, res) => {
       .status(300)
       .json({ status: false, message: "Email or password incorrect." });
   }
-  // if (!user.isEmailVerified) {
-  //   return res.status(200).json({
-  //     status: true,
-  //     message:
-  //       "Your account is not verified. Please check your email and verify your account.",
-  //   });
-  // }
+  if (!user.isPhoneVerified) {
+    return res.status(200).json({
+      status: false,
+      id: user._id,
+      message:
+        "Your account is not verified. Please check your phone and verify your account.",
+    });
+  }
 
-  //Temoprary OTP added
+  //Temporary OTP added
   sendToken(user, res, "Login successful", 123456, 200, "loggedBy: Email");
 };
 
@@ -246,8 +258,18 @@ exports.logout = (req, res) => {
 };
 
 // get profile data
-exports.getMyProfile = (req, res) => {
-  res.status(200).json({ success: false, user: req.user });
+exports.getMyProfile = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await Users.findById(id);
+    const { name, email, phone } = user;
+    res.status(200).json({ success: true, name, email, phone });
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ status: false, message: "Please login and try again" });
+  }
 };
 
 // Users fetching for admin
