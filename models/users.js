@@ -28,13 +28,9 @@ const users = new mongoose.Schema(
     image: {
       type: String,
     },
-    isEmailVerified: {
+    isPhoneVerified: {
       type: Boolean,
       default: false,
-    },
-    emailVerifyKey: {
-      type: String,
-      default: uniqid(),
     },
     phone_OTP: {
       type: String,

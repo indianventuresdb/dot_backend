@@ -8,10 +8,13 @@ const {
   getMyProfile,
   fetchUsers,
   deleteUser,
-  usersNumbers
+  usersNumbers,
 } = require("../controllers/user.js");
 // const { isAuthenticated } = require("../middlewares/auth.js");
-const { isLoginData, isRegisterData } = require("../validation/users_Validation.js");
+const {
+  isLoginData,
+  isRegisterData,
+} = require("../validation/users_Validation.js");
 
 const router = express.Router();
 
@@ -23,11 +26,11 @@ router.post("/login_admin", loginAdmin);
 
 router.delete("/delete/:userId", deleteUser);
 
-router.get("/verify/:id/:key", verify);
+router.get("/verify/:id/:otp", verify);
 
 router.get("/logout", logout);
 
-router.get("/me", getMyProfile);
+router.get("/me/:id", getMyProfile);
 
 router.get("/counts", usersNumbers);
 
