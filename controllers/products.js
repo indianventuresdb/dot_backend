@@ -1,3 +1,4 @@
+const fs = require("fs");
 const { Products } = require("../models/products.js");
 
 const addProducts = async (req, res) => {
@@ -16,8 +17,16 @@ const addProducts = async (req, res) => {
     mrp,
     offeredPrice,
     detailedDescription,
+    mainImage,
+    firstImage,
+    secondImage,
+    thirdImage,
   } = req.body;
 
+  const images = [];
+  if (firstImage) images.push(firstImage);
+  if (secondImage) images.push(secondImage);
+  if (thirdImage) images.push(thirdImage);
   let discount = ((mrp - offeredPrice) / mrp) * 100;
 
   try {
@@ -37,7 +46,8 @@ const addProducts = async (req, res) => {
       mrp,
       offeredPrice,
       detailedDescription,
-      images: req.files,
+      mainImage,
+      otherImages: images,
     });
     if (!product) {
       return res.status(400).json({ message: "Product add failed..." });
@@ -49,6 +59,18 @@ const addProducts = async (req, res) => {
       .status(300)
       .json({ message: "Product add failed, server error..." });
   }
+};
+
+const addImage = async (req, res) => {
+  res.status(200).json({ path: req.file.path });
+};
+
+const deleteImage = async (req, res) => {
+  const { path } = req.body;
+  fs.unlink(path, (err) => {
+    console.log(err);
+  });
+  res.status(200).json({ status: true });
 };
 
 // Remove Product from database
@@ -177,9 +199,11 @@ const productNumbers = async (req, res) => {
 module.exports = {
   addProducts,
   removeProducts,
+  addImage,
   updateProducts,
   getProducts,
   searchProducts,
+  deleteImage,
   getOneProduct,
   productNumbers,
 };

@@ -66,9 +66,12 @@ const products = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    image: {
-      type: [String],
+    mainImage: {
+      type: String,
       required: true,
+    },
+    otherImages: {
+      type: [String],
     },
     productVideo: {
       type: String,
