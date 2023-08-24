@@ -54,7 +54,7 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/orders", ordersRouter);
 
 // Use the products router
-app.use("/api/v1/products", productsRouter);
+app.use("/api/v1/products", upload.single("mainImage"), productsRouter);
 
 // Use the products router
 app.use("/api/v1/payment", paymentRouter);

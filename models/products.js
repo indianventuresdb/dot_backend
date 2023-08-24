@@ -6,16 +6,28 @@ const products = new mongoose.Schema(
       type: String,
       required: true,
     },
-    productType: {
-      type: String,
-      required: true,
-    },
     shortDescription: {
       type: String,
       required: true,
     },
+    size: {
+      type: String,
+      required: true,
+    },
+    tags: {
+      type: [String],
+      required: true,
+    },
     category: {
       type: String,
+      required: true,
+    },
+    tax: {
+      type: Number,
+      default: 12,
+    },
+    quantity: {
+      type: Number,
       required: true,
     },
     color: {
@@ -26,14 +38,6 @@ const products = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    tags: {
-      type: [String],
-      required: true,
-    },
-    tax: {
-      type: Number,
-      default: 12,
-    },
     madeIn: {
       type: String,
       default: "India",
@@ -41,9 +45,6 @@ const products = new mongoose.Schema(
     brand: {
       type: String,
       default: "Augse",
-    },
-    hsnCode: {
-      type: String,
     },
     isCodAllowed: {
       type: Boolean,
@@ -65,18 +66,14 @@ const products = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    mainImage: {
-      type: String,
-      required: true,
-    },
-    otherImage: {
+    image: {
       type: [String],
       required: true,
     },
     productVideo: {
       type: String,
     },
-    DetailedDescription: {
+    detailedDescription: {
       type: String,
       required: true,
     },

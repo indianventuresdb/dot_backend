@@ -3,22 +3,19 @@ const { Products } = require("../models/products.js");
 const addProducts = async (req, res) => {
   const {
     productName,
-    productType,
     shortDescription,
+    size,
     tags,
     category,
+    tax,
+    quantity,
     color,
-    hsnCode,
     isCodAllowed,
     isReturnAble,
     isCancelAble,
     mrp,
     offeredPrice,
-    mainImage,
-    otherImage,
-    productVideo,
-    DetailedDescription,
-    visibility,
+    detailedDescription,
   } = req.body;
 
   let discount = ((mrp - offeredPrice) / mrp) * 100;
@@ -26,38 +23,44 @@ const addProducts = async (req, res) => {
   try {
     const product = await Products.create({
       productName,
-      productType,
       shortDescription,
+      size,
       tags,
       category,
+      tax,
+      quantity,
       color,
       discount,
-      hsnCode,
       isCodAllowed,
       isReturnAble,
       isCancelAble,
       mrp,
       offeredPrice,
-      mainImage,
-      otherImage,
-      productVideo,
-      DetailedDescription,
-      visibility,
+      detailedDescription,
+      images: req.files,
     });
     if (!product) {
       return res.status(400).json({ message: "Product add failed..." });
     }
     return res.status(200).json({ message: "Product added successfully." });
   } catch (error) {
-    return res.status(300).json({ message: "Product add failed..." });
+    console.log(error);
+    return res
+      .status(300)
+      .json({ message: "Product add failed, server error..." });
   }
 };
 
 // Remove Product from database
 const removeProducts = async (req, res) => {
   const { productId } = req.params;
+
   try {
     const product = await Products.findByIdAndDelete(productId);
+    console.log(product);
+    // fs.unlink(product.mainImage, (err) => {
+    //   console.log(err);
+    // });
     // Turnory operator
     !product
       ? res.status(300).json({ message: "Product Can not deleted." })
@@ -72,22 +75,19 @@ const updateProducts = async (req, res) => {
   const { productId } = req.params;
   const {
     productName,
-    productType,
     shortDescription,
+    size,
     tags,
     category,
+    tax,
+    quantity,
     color,
-    hsnCode,
     isCodAllowed,
     isReturnAble,
     isCancelAble,
     mrp,
     offeredPrice,
-    mainImage,
-    otherImage,
-    productVideo,
-    DetailedDescription,
-    visibility,
+    detailedDescription,
   } = req.body;
 
   let discount = ((mrp - offeredPrice) / mrp) * 100;
@@ -95,11 +95,12 @@ const updateProducts = async (req, res) => {
   try {
     const product = await Products.findByIdAndUpdate(productId, {
       productName,
-      productType,
       shortDescription,
+      size,
       tags,
-      hsnCode,
       category,
+      tax,
+      quantity,
       color,
       discount,
       isCodAllowed,
@@ -107,11 +108,7 @@ const updateProducts = async (req, res) => {
       isCancelAble,
       mrp,
       offeredPrice,
-      mainImage,
-      otherImage,
-      productVideo,
-      DetailedDescription,
-      visibility,
+      detailedDescription,
     });
     // Turnory Oprator
     console.log(product);
