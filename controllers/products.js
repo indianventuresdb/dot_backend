@@ -1,5 +1,6 @@
 const fs = require("fs");
 const { Products } = require("../models/products.js");
+const { log } = require("console");
 
 const addProducts = async (req, res) => {
   const {
@@ -218,6 +219,21 @@ const productNumbers = async (req, res) => {
   }
 };
 
+const productOfParticularCategory = async (req, res) => {
+  const { categoryName } = req.params;
+  try {
+    const productCount = await Products.countDocuments({
+      category: categoryName,
+    });
+    res.status(200).json({ count: productCount });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching product count" });
+  }
+};
+
 module.exports = {
   addProducts,
   removeProducts,
@@ -228,4 +244,5 @@ module.exports = {
   deleteImage,
   getOneProduct,
   productNumbers,
+  productOfParticularCategory,
 };
