@@ -16,8 +16,8 @@ const {
 const router = express.Router();
 
 router.post("/add_product", addProducts);
-router.delete("/remove_product/:id/:productId", removeProducts);
-router.put("/update_product/:id/:productId", updateProducts);
+router.delete("/remove_product/:productId", removeProducts);
+router.put("/update_product/:productId", updateProducts);
 router.post("/addimage", addImage);
 router.post("/deleteimage", deleteImage);
 
