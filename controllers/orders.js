@@ -1,6 +1,6 @@
-const { Orders } = require('../models/orders.js');
-const { Products } = require('../models/products.js');
-const { Users } = require('../models/users.js');
+const { Orders } = require("../models/orders.js");
+const { Products } = require("../models/products.js");
+const { Users } = require("../models/users.js");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
@@ -17,9 +17,9 @@ exports.createOrder = async (req, res) => {
 exports.getOrders = async (req, res) => {
   try {
     const orders = await Orders.find();
-    !orders ?
-      res.status(404).json({ message: "Order not found" }) :
-      res.status(200).json(orders);
+    !orders
+      ? res.status(404).json({ message: "Order not found" })
+      : res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -30,7 +30,7 @@ exports.getOrderById = async (req, res) => {
   try {
     const order = await Orders.findById(req.params.id);
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
     res.status(200).json(order);
   } catch (error) {
@@ -47,7 +47,7 @@ exports.updateOrder = async (req, res) => {
       { new: true }
     );
     if (!updatedOrder) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
     res.status(200).json(updatedOrder);
   } catch (error) {
@@ -60,9 +60,9 @@ exports.deleteOrder = async (req, res) => {
   try {
     const deletedOrder = await Orders.findByIdAndRemove(req.params.id);
     if (!deletedOrder) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
-    res.status(200).json({ message: 'Order deleted' });
+    res.status(200).json({ message: "Order deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -86,11 +86,9 @@ exports.ordersForSeller = async (req, res) => {
 
 exports.ordersNumbers = async (req, res) => {
   try {
-    const documentCount = await Orders.countDocuments({});
-    !documentCount ?
-      res.status(300).json({ message: "fail to count" }) :
-      res.status(200).json({ numbers: documentCount });
+    const documentCount = await Orders.count({});
+    res.status(200).json({ numbers: documentCount });
   } catch (error) {
-    res.status(300).json({ message: "fail to count" });
+    res.status(300).json({ message: "fail to count orders" });
   }
 };
