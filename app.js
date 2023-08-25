@@ -16,6 +16,7 @@ const fileSender = require("./routes/files.js");
 const who_i_am = require("./routes/who_i_am.js");
 const { Slides } = require("./models/slider.js");
 const multer = require("multer");
+const tagsRouter = require("./routes/tags.js")
 
 // dot env configuration
 dotenv.config();
@@ -50,8 +51,11 @@ app.use("/api/v1/indentifier", who_i_am);
 // Use the user router
 app.use("/api/v1/user", userRouter);
 
+// Use the tags router
+app.use("/api/v1/tags", tagsRouter);
+
 // Use the orders router
-app.use("/api/v1/orders", ordersRouter);
+// app.use("/api/v1/orders", ordersRouter);
 
 // Use the products router
 app.use("/api/v1/products", upload.single("image"), productsRouter);
