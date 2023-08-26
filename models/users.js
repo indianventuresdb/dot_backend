@@ -48,6 +48,16 @@ const users = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    orders: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Orders",
+      default: [],
+    },
+    address: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Address",
+      default: [],
+    },
   },
   {
     timestamps: true,
