@@ -1,14 +1,33 @@
 const { Orders } = require("../models/orders.js");
 const { Products } = require("../models/products.js");
 const { Users } = require("../models/users.js");
+const calculateAmount = require("../utils/calculateAmount");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
+  const products = req.body.items;
+  const userId = req.body.user;
+  const addressId = req.body.addressId;
+  const amount = await calculateAmount(products);
+
+  const productsId = products.map((data) => data._id);
+  const quantity = products.map((data) => data.quantity);
+  const productName = products.map((data) => data.name);
+
   try {
-    const order = new Orders(req.body);
+    const order = new Orders({
+      userId: userId || "135642653226",
+      productId: productsId,
+      addressId: addressId || "235611234555",
+      quantity,
+      productName,
+      invoiceFileName: "File",
+      price: amount,
+    });
     const savedOrder = await order.save();
-    res.status(201).json(savedOrder);
+    res.status(201).json({ orderId: savedOrder._id });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
