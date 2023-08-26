@@ -8,6 +8,7 @@ const userRouter = require("./routes/users.js");
 const paymentRouter = require("./routes/payment.js");
 const ordersRouter = require("./routes/orders.js");
 const productsRouter = require("./routes/products.js");
+const addressRouter = require("./routes/address.js");
 const sliderRouter = require("./routes/slider.js");
 const invoice = require("./routes/Invoices.js");
 const { logger } = require("./middlewares/logger.js");
@@ -16,7 +17,7 @@ const fileSender = require("./routes/files.js");
 const who_i_am = require("./routes/who_i_am.js");
 const { Slides } = require("./models/slider.js");
 const multer = require("multer");
-const tagsRouter = require("./routes/tags.js")
+const tagsRouter = require("./routes/tags.js");
 
 // dot env configuration
 dotenv.config();
@@ -50,6 +51,9 @@ app.use("/api/v1/indentifier", who_i_am);
 
 // Use the user router
 app.use("/api/v1/user", userRouter);
+
+// Use the user router
+app.use("/api/v1/address", addressRouter);
 
 // Use the tags router
 app.use("/api/v1/tags", tagsRouter);
