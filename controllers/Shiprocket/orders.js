@@ -15,7 +15,7 @@ const createOrder = async (req, res) => {
     const config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: "https://apiv2.shiprocket.in/v1/external/auth/login",
+      url: "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
       headers: {
         "Content-Type": "application/json",
       },
