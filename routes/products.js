@@ -11,13 +11,14 @@ const {
   addImage,
   deleteImage,
   productNumbers,
+  productOfParticularCategory,
 } = require("../controllers/products.js");
 
 const router = express.Router();
 
 router.post("/add_product", addProducts);
-router.delete("/remove_product/:id/:productId", removeProducts);
-router.put("/update_product/:id/:productId", updateProducts);
+router.delete("/remove_product/:productId", removeProducts);
+router.put("/update_product/:productId", updateProducts);
 router.post("/addimage", addImage);
 router.post("/deleteimage", deleteImage);
 
@@ -25,6 +26,7 @@ router.post("/deleteimage", deleteImage);
 router.get("/get_all_Products", getProducts);
 router.get("/search/:searchString", searchProducts);
 router.get("/product/:productId", getOneProduct);
+router.get("/category/:categoryName", productOfParticularCategory);
 router.get("/count", productNumbers);
 
 module.exports = router;

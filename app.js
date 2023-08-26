@@ -59,7 +59,7 @@ app.use("/api/v1/address", addressRouter);
 app.use("/api/v1/tags", tagsRouter);
 
 // Use the orders router
-// app.use("/api/v1/orders", ordersRouter);
+app.use("/api/v1/orders", ordersRouter);
 
 // Use the products router
 app.use("/api/v1/products", upload.single("image"), productsRouter);

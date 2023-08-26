@@ -1,5 +1,6 @@
 const fs = require("fs");
 const { Products } = require("../models/products.js");
+const { log } = require("console");
 
 const addProducts = async (req, res) => {
   const {
@@ -62,7 +63,11 @@ const addProducts = async (req, res) => {
 };
 
 const addImage = async (req, res) => {
-  res.status(200).json({ path: req.file.path });
+  if (req.file) {
+    res.status(200).json({ path: req.file.path });
+  } else {
+    res.status(404).json({ message: "No image found" });
+  }
 };
 
 const deleteImage = async (req, res) => {
@@ -79,10 +84,18 @@ const removeProducts = async (req, res) => {
 
   try {
     const product = await Products.findByIdAndDelete(productId);
-    console.log(product);
-    // fs.unlink(product.mainImage, (err) => {
-    //   console.log(err);
-    // });
+
+    if (product) {
+      fs.unlink(product.mainImage, (err) => {
+        console.log(err);
+      });
+      for (let i = 0; i < product.otherImages.length; i++) {
+        if (!product.otherImages[i]) continue;
+        fs.unlink(product.otherImages[i], (err) => {
+          console.log(err);
+        });
+      }
+    }
     // Turnory operator
     !product
       ? res.status(300).json({ message: "Product Can not deleted." })
@@ -110,8 +123,16 @@ const updateProducts = async (req, res) => {
     mrp,
     offeredPrice,
     detailedDescription,
+    mainImage,
+    firstImage,
+    secondImage,
+    thirdImage,
   } = req.body;
 
+  const images = [];
+  if (firstImage) images.push(firstImage);
+  if (secondImage) images.push(secondImage);
+  if (thirdImage) images.push(thirdImage);
   let discount = ((mrp - offeredPrice) / mrp) * 100;
 
   try {
@@ -131,9 +152,11 @@ const updateProducts = async (req, res) => {
       mrp,
       offeredPrice,
       detailedDescription,
+      mainImage,
+      otherImages: images,
     });
     // Turnory Oprator
-    console.log(product);
+    console.log("Inside" + product);
     !product
       ? res.status(300).json({ message: "Product can not updated" })
       : res.status(200).json({ message: "Product updated successfully" });
@@ -196,6 +219,21 @@ const productNumbers = async (req, res) => {
   }
 };
 
+const productOfParticularCategory = async (req, res) => {
+  const { categoryName } = req.params;
+  try {
+    const productCount = await Products.countDocuments({
+      category: categoryName,
+    });
+    res.status(200).json({ count: productCount });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching product count" });
+  }
+};
+
 module.exports = {
   addProducts,
   removeProducts,
@@ -206,4 +244,5 @@ module.exports = {
   deleteImage,
   getOneProduct,
   productNumbers,
+  productOfParticularCategory,
 };
