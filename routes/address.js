@@ -3,13 +3,15 @@ const {
   addAddress,
   updateAddress,
   getAddress,
+  deleteAddress,
 } = require("../controllers/address");
+const { isAuthenticated } = require("../middlewares/auth");
 
 const router = express.Router();
 
-router.post("/create", addAddress);
-router.put("/update", updateAddress);
-router.get("/find", getAddress);
-router.delete("/delete/:addressId", getAddress);
+router.post("/create", isAuthenticated, addAddress);
+router.put("/update/:addressId", updateAddress);
+router.get("/find", isAuthenticated, getAddress);
+router.delete("/delete/:addressId", deleteAddress);
 
 module.exports = router;

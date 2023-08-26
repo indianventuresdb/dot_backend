@@ -4,22 +4,27 @@ const jwt = require("jsonwebtoken");
 const generateOTP = require("../utils/otpGenerator.js");
 const { sendSMS } = require("../utils/smsSender.js");
 
-const sendToken = (
-  user,
-  res,
-  message,
-  otp,
-  statusCode = 200,
-  loggedBy = null
-) => {
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-  res
-    .status(statusCode)
-    .cookie("token", token, {
-      maxAge: 120 * 60 * 1000,
-      path: "/",
-    })
-    .json({ status: true, message, otp, id: user._id });
+const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
+  let token;
+  try {
+    token = jwt.sign(
+      { _id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+  } catch (error) {}
+
+  if (!user.isPhoneVerified) {
+    return res.status(200).json({
+      status: false,
+      token,
+      id: user._id,
+      message:
+        "Your account is not verified. Please check your phone and verify your account.",
+    });
+  }
+
+  res.status(statusCode).json({ status: true, message, token, id: user._id });
 };
 
 const sendTokenAdmin = (user, res, path, statusCode = 200) => {
@@ -66,7 +71,6 @@ exports.register = async (req, res) => {
             user,
             res,
             "Account Created successfully. Please check your phone and verify your account.",
-            otp,
             200
           );
         } else {
@@ -141,9 +145,7 @@ exports.login = async (req, res) => {
       .json({ status: false, message: "Internal Server Error" });
   }
   if (!user) {
-    return res
-      .status(300)
-      .json({ status: false, message: "Email or password incorrect." });
+    return res.status(300).json({ status: false, message: "No user found" });
   }
 
   const verifyPassword = await bcrypt.compare(password, user.password);
@@ -152,17 +154,8 @@ exports.login = async (req, res) => {
       .status(300)
       .json({ status: false, message: "Email or password incorrect." });
   }
-  if (!user.isPhoneVerified) {
-    return res.status(200).json({
-      status: false,
-      id: user._id,
-      message:
-        "Your account is not verified. Please check your phone and verify your account.",
-    });
-  }
 
-  //Temporary OTP added
-  sendToken(user, res, "Login successful", 123456, 200, "loggedBy: Email");
+  sendToken(user, res, "Login successful", 200, "loggedBy: Email");
 };
 
 // User Login Controller

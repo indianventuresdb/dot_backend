@@ -1,21 +1,51 @@
+const mongoose = require("mongoose");
 const { Address } = require("../models/address");
+const { Users } = require("../models/users");
 
 const addAddress = async (req, res) => {
-  const { landmark, city, state, country, street, houseNumber, pinCode } =
-    req.body;
-  const { userId } = req.user;
+  const {
+    landmark,
+    city,
+    state,
+    country,
+    street,
+    phone,
+    houseNumber,
+    pinCode,
+  } = req.body;
+  const userId = req.user;
+
+  let user;
   try {
-    const address = await Address.create({
+    user = await Users.findById(userId);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ success: false, message: "No user found." });
+  }
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "No user found." });
+  }
+
+  try {
+    const newAddress = new Address({
       userId,
-      houseNumber,
-      street,
-      country,
-      state,
-      city,
       landmark,
+      city,
+      state,
+      country,
+      street,
+      phone,
+      houseNumber,
       pinCode,
     });
-    !address
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await newAddress.save({ session: sess });
+    user.address.push(newAddress);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
+    !newAddress
       ? res
           .status(301)
           .json({ success: false, message: "Address could not saved." })
@@ -23,7 +53,7 @@ const addAddress = async (req, res) => {
           .status(201)
           .json({ success: true, message: "Address Added successful." });
   } catch (error) {
-    console.error("Address creation failed.");
+    console.error(error);
     return res
       .status(402)
       .json({ success: false, message: "there is a problem in sever." });
@@ -35,7 +65,8 @@ const getAddress = async (req, res) => {
   const userId = req.user;
 
   try {
-    const addresses = await Address.find({ userId });
+    const user = await Users.findById(userId).populate("address");
+    const addresses = user.address;
     !addresses
       ? res
           .status(301)
@@ -51,25 +82,27 @@ const getAddress = async (req, res) => {
 
 const updateAddress = async (req, res) => {
   const {
-    addressId,
     landmark,
     city,
     state,
     country,
     street,
+    phone,
     houseNumber,
     pinCode,
   } = req.body;
-  const { userId } = req.user;
+  const { addressId } = req.params;
+  const userId = req.user;
   try {
     const address = await Address.findByIdAndUpdate(addressId, {
       userId,
-      houseNumber,
-      street,
-      country,
-      state,
-      city,
       landmark,
+      city,
+      state,
+      country,
+      street,
+      phone,
+      houseNumber,
       pinCode,
     });
     !address
