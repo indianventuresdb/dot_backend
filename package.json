@@ -7,6 +7,9 @@
   "repository": "https://github.com/surendraSinghKamboj/dot_backend.git",
   "author": "Surendra Singh Kamboj",
   "license": "MIT",
+  "engines": {
+    "node": ">=14.20.1"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
