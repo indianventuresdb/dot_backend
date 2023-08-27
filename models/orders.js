@@ -17,6 +17,10 @@ const orders = new mongoose.Schema(
       ref: "Address",
       required: true,
     },
+    productCost: {
+      type: [Number],
+      required: true,
+    },
     quantity: {
       type: [Number],
       required: true,

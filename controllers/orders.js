@@ -8,9 +8,15 @@ exports.createOrder = async (req, res) => {
   const products = req.body.items;
   const userId = req.body.userId;
   const addressId = req.body.addressId;
-  const amount = await calculateAmount(products);
 
+  let amount;
+  try {
+    amount = await calculateAmount(products);
+  } catch (error) {}
+
+  // console.log(products);
   const productsId = products.map((data) => data._id);
+  const productCost = products.map((data) => data.price);
   const quantity = products.map((data) => data.quantity);
   const productName = products.map((data) => data.name);
 
@@ -18,6 +24,7 @@ exports.createOrder = async (req, res) => {
     const order = new Orders({
       userId,
       productId: productsId,
+      productCost,
       addressId,
       quantity,
       productName,
