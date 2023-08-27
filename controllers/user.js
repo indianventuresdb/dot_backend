@@ -24,7 +24,9 @@ const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
     });
   }
 
-  res.status(statusCode).json({ status: true, message, token, id: user._id });
+  res
+    .status(statusCode)
+    .json({ status: true, message, token: btoa(token), id: user._id });
 };
 
 const sendTokenAdmin = (user, res, path, statusCode = 200) => {

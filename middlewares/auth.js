@@ -6,7 +6,8 @@ exports.isAuthenticated = async (req, res, next) => {
     if (!token) {
       return res.redirect("http:/localhost:3000/users/login");
     }
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const realtoken = atob(token);
+    const decodedToken = jwt.verify(realtoken, process.env.JWT_SECRET);
     req.user = decodedToken._id;
     console.log("Authenticated");
   } catch (error) {
