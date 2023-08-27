@@ -78,6 +78,21 @@ const getAddress = async (req, res) => {
   }
 };
 
+const addressbyId = async (req, res) => {
+  const { addressId } = req.params;
+  console.log(addressId);
+  try {
+    const address = await Address.findById(addressId);
+    !address
+      ? res
+          .status(301)
+          .json({ success: false, message: "failed to find saved address" })
+      : res.status(200).json({ success: true, address });
+  } catch (error) {
+    res.status(402).json({ success: false, message: "Problem in server" });
+  }
+};
+
 //update address controller
 
 const updateAddress = async (req, res) => {
@@ -138,4 +153,10 @@ const deleteAddress = async (req, res) => {
   }
 };
 
-module.exports = { addAddress, getAddress, updateAddress, deleteAddress };
+module.exports = {
+  addAddress,
+  getAddress,
+  updateAddress,
+  deleteAddress,
+  addressbyId,
+};

@@ -6,7 +6,7 @@ const calculateAmount = require("../utils/calculateAmount");
 // Create a new order
 exports.createOrder = async (req, res) => {
   const products = req.body.items;
-  const userId = req.body.user;
+  const userId = req.body.userId;
   const addressId = req.body.addressId;
   const amount = await calculateAmount(products);
 
@@ -16,9 +16,9 @@ exports.createOrder = async (req, res) => {
 
   try {
     const order = new Orders({
-      userId: userId || "135642653226",
+      userId,
       productId: productsId,
-      addressId: addressId || "235611234555",
+      addressId,
       quantity,
       productName,
       invoiceFileName: "File",
