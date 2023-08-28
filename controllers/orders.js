@@ -49,14 +49,36 @@ exports.createOrder = async (req, res) => {
     });
     const sess = await mongoose.startSession();
     sess.startTransaction();
+
+    for (let i = 0; i < products.length; i++) {
+      const productId = products[i]._id;
+      const productQuantity = products[i].quantity;
+
+      const product = await Products.findById(productId).session(sess);
+      console.log(product);
+
+      if (!product) {
+        throw new Error(`Product with ID ${productId} not found.`);
+      }
+
+      if (product.quantity < productQuantity) {
+        throw new Error(
+          `Insufficient stock for product ${product.productName}.`
+        );
+      }
+
+      product.quantity = product.quantity - productQuantity;
+      await product.save();
+    }
     const savedOrder = await order.save({ session: sess });
+
     user.orders.push(order);
     await user.save({ session: sess });
     await sess.commitTransaction();
+
     res.status(201).json({ orderId: savedOrder._id });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 };
 

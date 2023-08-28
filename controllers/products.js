@@ -29,12 +29,14 @@ const addProducts = async (req, res) => {
   if (thirdImage) images.push(thirdImage);
   let discount = ((mrp - offeredPrice) / mrp) * 100;
 
+  const tagArray = tags.split(",");
+
   try {
     const product = await Products.create({
       productName,
       shortDescription,
       size,
-      tags,
+      tags: tagArray,
       category,
       tax,
       quantity,
@@ -134,12 +136,14 @@ const updateProducts = async (req, res) => {
   if (thirdImage) images.push(thirdImage);
   let discount = ((mrp - offeredPrice) / mrp) * 100;
 
+  const tagArray = tags.split(",");
+
   try {
     const product = await Products.findByIdAndUpdate(productId, {
       productName,
       shortDescription,
       size,
-      tags,
+      tags: tagArray,
       category,
       tax,
       quantity,
