@@ -1,6 +1,5 @@
 const fs = require("fs");
 const { Products } = require("../models/products.js");
-const { log } = require("console");
 
 const addProducts = async (req, res) => {
   const {

@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const { Orders } = require("../models/orders.js");
 const { Products } = require("../models/products.js");
 const { Users } = require("../models/users.js");
@@ -9,16 +10,31 @@ exports.createOrder = async (req, res) => {
   const userId = req.body.userId;
   const addressId = req.body.addressId;
 
-  let amount;
+  let price = 0;
   try {
-    amount = await calculateAmount(products);
-  } catch (error) {}
+    price = await calculateAmount(products);
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ success: false, message: "Failed to calculate price" });
+  }
 
-  // console.log(products);
   const productsId = products.map((data) => data._id);
   const productCost = products.map((data) => data.price);
   const quantity = products.map((data) => data.quantity);
   const productName = products.map((data) => data.name);
+
+  let user;
+  try {
+    user = await Users.findById(userId);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ success: false, message: "No user found." });
+  }
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "No user found." });
+  }
 
   try {
     const order = new Orders({
@@ -29,9 +45,14 @@ exports.createOrder = async (req, res) => {
       quantity,
       productName,
       invoiceFileName: "File",
-      price: amount,
+      price,
     });
-    const savedOrder = await order.save();
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    const savedOrder = await order.save({ session: sess });
+    user.orders.push(order);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
     res.status(201).json({ orderId: savedOrder._id });
   } catch (error) {
     console.log(error);
@@ -53,12 +74,26 @@ exports.getOrders = async (req, res) => {
 
 // Get a single order by ID
 exports.getOrderById = async (req, res) => {
+  const id = req.params.id;
   try {
-    const order = await Orders.findById(req.params.id);
+    const order = await Orders.findById(id);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
     res.status(200).json(order);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getOrderByUserId = async (req, res) => {
+  const userId = req.params.userId;
+  try {
+    const user = await Users.findById(userId).populate("orders");
+    if (!user) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    res.status(200).json({ orders: user.orders });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
