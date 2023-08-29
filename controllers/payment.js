@@ -22,8 +22,7 @@ exports.checkOut = async (req, res) => {
     const order = await instance.orders.create(options);
     order ? res.status(200).json({ success: true, order }) : null;
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ success: false, message: "Order can not create." });
+    res.redirect(process.env.FRONTEND + `/unsuccess`);
   }
 };
 
@@ -56,13 +55,9 @@ exports.verifyPayment = async (req, res) => {
       res.status(500).json({ error: error.message });
     }
 
-    res.redirect(
-      `http://localhost:3000/Payment/paymentsuccessful/${razorpay_payment_id}`
-    );
+    res.redirect(process.env.FRONTEND + `/success`);
   } else {
-    res.status(400).json({
-      success: false,
-    });
+    res.redirect(process.env.FRONTEND + `/unsuccess`);
   }
 };
 
