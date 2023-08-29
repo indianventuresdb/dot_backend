@@ -29,6 +29,14 @@ const orders = new mongoose.Schema(
       type: [String],
       required: true,
     },
+    productImage: {
+      type: [String],
+      required: true,
+    },
+    status: {
+      type: String,
+      default: "Order Placed",
+    },
     invoiceFileName: {
       type: String,
     },

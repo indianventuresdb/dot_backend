@@ -23,6 +23,7 @@ exports.createOrder = async (req, res) => {
   const productCost = products.map((data) => data.price);
   const quantity = products.map((data) => data.quantity);
   const productName = products.map((data) => data.name);
+  const productImage = products.map((data) => data.image);
 
   let user;
   try {
@@ -46,6 +47,7 @@ exports.createOrder = async (req, res) => {
       productName,
       invoiceFileName: "File",
       price,
+      productImage,
     });
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -55,8 +57,6 @@ exports.createOrder = async (req, res) => {
       const productQuantity = products[i].quantity;
 
       const product = await Products.findById(productId).session(sess);
-      console.log(product);
-
       if (!product) {
         throw new Error(`Product with ID ${productId} not found.`);
       }
