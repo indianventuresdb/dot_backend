@@ -47,6 +47,7 @@ exports.verifyPayment = async (req, res) => {
         razorpay_payment_id,
         razorpay_signature,
         payment_successful: true,
+        order_placed: new Date(),
       });
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
