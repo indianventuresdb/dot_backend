@@ -9,6 +9,7 @@ exports.createOrder = async (req, res) => {
   const products = req.body.items;
   const userId = req.body.userId;
   const addressId = req.body.addressId;
+  const paymentMode = req.body.paymentMode;
 
   let price = 0;
   try {
@@ -48,6 +49,7 @@ exports.createOrder = async (req, res) => {
       invoiceFileName: "File",
       price,
       productImage,
+      paymentMode,
     });
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -98,7 +100,7 @@ exports.getOrders = async (req, res) => {
 exports.getOrderById = async (req, res) => {
   const id = req.params.id;
   try {
-    const order = await Orders.findById(id);
+    const order = await Orders.findById(id).populate("addressId");
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }

@@ -57,21 +57,36 @@ const orders = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    isOnTheWay: {
-      type: Boolean,
-      default: false,
+    order_placed: {
+      type: String,
     },
-    way: {
-      type: [String],
-      default: [],
+    packed: {
+      type: String,
     },
-    isDelivered: {
-      type: Boolean,
-      default: false,
+    outForDelivery: {
+      type: String,
+    },
+    shipped: {
+      type: String,
+    },
+    awb: {
+      type: String,
+      default: "",
+    },
+    expectedDelivery: {
+      type: String,
+      default: new Date(new Date() + 1000 * 60 * 60 * 24 * 7),
+    },
+    delivered: {
+      type: String,
     },
     isReturned: {
       type: Boolean,
       default: false,
+    },
+    paymentMode: {
+      type: String,
+      required: true,
     },
   },
   {
