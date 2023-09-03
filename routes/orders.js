@@ -16,7 +16,7 @@ const router = express.Router();
 router.post("/orders", createOrder);
 
 // Get all orders
-router.get("/orders", isAuthenticated, getOrders);
+router.get("/orders", getOrders);
 
 // Get a single order by ID
 router.get("/orders/:id", getOrderById);
