@@ -69,6 +69,10 @@ const orders = new mongoose.Schema(
     shipped: {
       type: String,
     },
+    cancelled: {
+      type: Boolean,
+      default: false,
+    },
     awb: {
       type: String,
       default: "",

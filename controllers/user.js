@@ -267,6 +267,21 @@ exports.getMyProfile = async (req, res) => {
   }
 };
 
+exports.userProfile = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await Users.findById(id)
+      .populate("address")
+      .populate("orders");
+    res.status(200).json(user);
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ status: false, message: "Failed to fetch data" });
+  }
+};
+
 // Users fetching for admin
 exports.fetchUsers = async (req, res) => {
   const { adminType } = req.params;
