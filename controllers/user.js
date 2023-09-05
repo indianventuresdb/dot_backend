@@ -213,7 +213,7 @@ exports.loginAdmin = async (req, res) => {
           .status(500)
           .json({ status: false, message: "Email or password incorrect." });
       }
-      if (!user.isEmailVerified) {
+      if (!user.isPhoneVerified) {
         return res.status(200).json({
           status: true,
           message:
