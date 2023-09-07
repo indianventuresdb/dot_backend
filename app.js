@@ -10,6 +10,8 @@ const ordersRouter = require("./routes/orders.js");
 const productsRouter = require("./routes/products.js");
 const addressRouter = require("./routes/address.js");
 const sliderRouter = require("./routes/slider.js");
+const salesRouter = require("./routes/sales.js");
+const categoryRouter = require("./routes/category.js");
 const invoice = require("./routes/Invoices.js");
 const { logger } = require("./middlewares/logger.js");
 const { pathToUrl } = require("./utils/pathToUrl.js");
@@ -57,6 +59,12 @@ app.use("/api/v1/address", addressRouter);
 
 // Use the tags router
 app.use("/api/v1/tags", tagsRouter);
+
+// Use the category router
+app.use("/api/v1/category", categoryRouter);
+
+// Use the sales router
+app.use("/api/v1/sales", salesRouter);
 
 // Use the orders router
 app.use("/api/v1/orders", ordersRouter);

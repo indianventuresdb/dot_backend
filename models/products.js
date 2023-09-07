@@ -12,7 +12,6 @@ const products = new mongoose.Schema(
     },
     size: {
       type: String,
-      required: true,
     },
     tags: {
       type: [String],
