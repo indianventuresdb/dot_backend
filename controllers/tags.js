@@ -16,7 +16,7 @@ const getTags = async (req, res) => {
 };
 
 const addTags = async (req, res) => {
-  const tags = req.body.tags;
+  const tags = req.body.data;
   try {
     const tag = await tagsSchema.create({ tags });
     tag

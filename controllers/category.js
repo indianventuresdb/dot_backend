@@ -16,7 +16,7 @@ const getCategory = async (req, res) => {
 };
 
 const addCategory = async (req, res) => {
-  const category = req.body.category;
+  const category = req.body.data;
   try {
     const cat = await categorySchema.create({ category });
     cat
