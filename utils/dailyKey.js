@@ -7,4 +7,4 @@ function generateDailyKey() {
   return `${year}-${month}-${day}`;
 }
 
-export default generateDailyKey;
+module.exports = generateDailyKey;

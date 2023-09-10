@@ -56,7 +56,6 @@ const addProducts = async (req, res) => {
     }
     return res.status(200).json({ message: "Product added successfully." });
   } catch (error) {
-    console.log(error);
     return res
       .status(300)
       .json({ message: "Product add failed, server error..." });
@@ -159,7 +158,6 @@ const updateProducts = async (req, res) => {
       otherImages: images,
     });
     // Turnory Oprator
-    console.log("Inside" + product);
     !product
       ? res.status(300).json({ message: "Product can not updated" })
       : res.status(200).json({ message: "Product updated successfully" });

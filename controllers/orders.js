@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const { Orders } = require("../models/orders.js");
 const { Products } = require("../models/products.js");
 const { Users } = require("../models/users.js");
+const { Sales } = require("../models/sales.js");
+const generateDailyKey = require("../utils/dailyKey.js");
 const calculateAmount = require("../utils/calculateAmount");
 
 // Create a new order
@@ -25,6 +27,7 @@ exports.createOrder = async (req, res) => {
   const quantity = products.map((data) => data.quantity);
   const productName = products.map((data) => data.name);
   const productImage = products.map((data) => data.image);
+  const categoryMap = new Map();
 
   let user;
   try {
@@ -37,6 +40,8 @@ exports.createOrder = async (req, res) => {
   if (!user) {
     return res.status(404).json({ success: false, message: "No user found." });
   }
+
+  let sess;
 
   try {
     const order = new Orders({
@@ -51,7 +56,7 @@ exports.createOrder = async (req, res) => {
       productImage,
       paymentMode,
     });
-    const sess = await mongoose.startSession();
+    sess = await mongoose.startSession();
     sess.startTransaction();
 
     for (let i = 0; i < products.length; i++) {
@@ -68,18 +73,50 @@ exports.createOrder = async (req, res) => {
           `Insufficient stock for product ${product.productName}.`
         );
       }
+      const categoryName = product.category;
+      if (categoryMap.has(categoryName)) {
+        const currentQuantity = categoryMap.get(categoryName);
+        categoryMap.set(categoryName, currentQuantity + productQuantity);
+      } else {
+        categoryMap.set(categoryName, productQuantity);
+      }
 
       product.quantity = product.quantity - productQuantity;
       await product.save();
     }
     const savedOrder = await order.save({ session: sess });
-
     user.orders.push(order);
     await user.save({ session: sess });
+
+    const dailyKey = generateDailyKey();
+    const dailySales = await Sales.findOne({ dateKey: dailyKey });
+
+    if (!dailySales) {
+      await Sales.create({
+        dateKey: dailyKey,
+        sales: price,
+        category: categoryMap,
+      });
+    } else {
+      const sales = dailySales.sales + parseFloat(price);
+      dailySales.sales = sales;
+      for (const [categoryName, quantity] of categoryMap.entries()) {
+        if (dailySales.category.has(categoryName)) {
+          dailySales.category.set(
+            categoryName,
+            dailySales.category.get(categoryName) + quantity
+          );
+        } else {
+          dailySales.category.set(categoryName, quantity);
+        }
+      }
+      await dailySales.save();
+    }
     await sess.commitTransaction();
 
     res.status(201).json({ orderId: savedOrder._id });
   } catch (error) {
+    await sess.abortTransaction();
     res.status(400).json({ error: error.message });
   }
 };

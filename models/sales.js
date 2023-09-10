@@ -9,6 +9,7 @@ const sales = new mongoose.Schema({
   sales: {
     type: Number,
     default: 0,
+    require: true,
   },
   category: {
     type: Map,

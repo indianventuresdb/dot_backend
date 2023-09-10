@@ -77,10 +77,6 @@ const orders = new mongoose.Schema(
       type: String,
       default: "",
     },
-    expectedDelivery: {
-      type: String,
-      default: new Date(new Date() + 1000 * 60 * 60 * 24 * 7),
-    },
     delivered: {
       type: String,
     },
