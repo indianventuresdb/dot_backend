@@ -1,6 +1,5 @@
 const fs = require("fs");
 const { Products } = require("../models/products.js");
-const { log } = require("console");
 
 const addProducts = async (req, res) => {
   const {
@@ -30,12 +29,14 @@ const addProducts = async (req, res) => {
   if (thirdImage) images.push(thirdImage);
   let discount = ((mrp - offeredPrice) / mrp) * 100;
 
+  const tagArray = tags.split(",");
+
   try {
     const product = await Products.create({
       productName,
       shortDescription,
       size,
-      tags,
+      tags: tagArray,
       category,
       tax,
       quantity,
@@ -55,7 +56,6 @@ const addProducts = async (req, res) => {
     }
     return res.status(200).json({ message: "Product added successfully." });
   } catch (error) {
-    console.log(error);
     return res
       .status(300)
       .json({ message: "Product add failed, server error..." });
@@ -135,12 +135,14 @@ const updateProducts = async (req, res) => {
   if (thirdImage) images.push(thirdImage);
   let discount = ((mrp - offeredPrice) / mrp) * 100;
 
+  const tagArray = tags.split(",");
+
   try {
     const product = await Products.findByIdAndUpdate(productId, {
       productName,
       shortDescription,
       size,
-      tags,
+      tags: tagArray,
       category,
       tax,
       quantity,
@@ -156,7 +158,6 @@ const updateProducts = async (req, res) => {
       otherImages: images,
     });
     // Turnory Oprator
-    console.log("Inside" + product);
     !product
       ? res.status(300).json({ message: "Product can not updated" })
       : res.status(200).json({ message: "Product updated successfully" });

@@ -1,11 +1,11 @@
 const { Products } = require("../models/products");
 
 const calculateAmount = async (products) => {
-  let subTotal = 0;
+  let amount = 0;
   const promises = [];
 
   for (const item of products) {
-    const { _id, quantity } = item;
+    const { _id } = item;
     const productPromise = Products.findOne({ _id });
     promises.push(productPromise);
   }
@@ -14,11 +14,12 @@ const calculateAmount = async (products) => {
 
   resolvedProducts.forEach((product, index) => {
     const { offeredPrice } = product;
+    const { tax } = product;
     const { quantity } = products[index];
-    subTotal += offeredPrice * quantity;
+    amount += offeredPrice * (1 + tax / 100) * quantity;
   });
 
-  return subTotal.toFixed(2);
+  return amount.toFixed(2);
 };
 
 module.exports = calculateAmount;

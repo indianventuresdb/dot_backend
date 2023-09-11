@@ -1,22 +1,18 @@
 const jwt = require("jsonwebtoken");
-const { Users } = require("../models/users.js");
 
 exports.isAuthenticated = async (req, res, next) => {
-    const { token } = req.cookies;
-    console.log(req.cookies);
+  try {
+    const token = req.headers.authorization.split(" ")[1];
     if (!token) {
-        return res.redirect("/login.html");
+      return res.redirect("http:/localhost:3000/users/login");
     }
-
-    const decode = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (!decode) {
-        return res.redirect("/login.html");
-    }
-    try {
-        req.user = await Users.findById(decode._id);
-    } catch (error) {
-        return res.redirect("/login.html");
-    }
-    next();
+    const realtoken = atob(token);
+    const decodedToken = jwt.verify(realtoken, process.env.JWT_SECRET);
+    req.user = decodedToken._id;
+    console.log("Authenticated");
+  } catch (error) {
+    console.log(error);
+    return res.redirect("/login.html");
+  }
+  next();
 };

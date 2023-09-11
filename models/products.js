@@ -12,7 +12,6 @@ const products = new mongoose.Schema(
     },
     size: {
       type: String,
-      required: true,
     },
     tags: {
       type: [String],
@@ -30,9 +29,12 @@ const products = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    sold: {
+      type: Number,
+      default: 0,
+    },
     color: {
       type: String,
-      required: true,
     },
     discount: {
       type: Number,
@@ -81,7 +83,7 @@ const products = new mongoose.Schema(
       required: true,
     },
     visibility: {
-      type: String,
+      type: Boolean,
       default: true,
     },
     viewCount: {

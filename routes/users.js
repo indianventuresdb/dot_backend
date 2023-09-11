@@ -9,6 +9,7 @@ const {
   fetchUsers,
   deleteUser,
   usersNumbers,
+  userProfile,
 } = require("../controllers/user.js");
 // const { isAuthenticated } = require("../middlewares/auth.js");
 const {
@@ -35,5 +36,7 @@ router.get("/me/:id", getMyProfile);
 router.get("/counts", usersNumbers);
 
 router.get("/getusers/:adminType", fetchUsers);
+
+router.get("/detail/:id", userProfile);
 
 module.exports = router;

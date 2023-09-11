@@ -1,50 +1,97 @@
 const mongoose = require("mongoose");
 
-const orders = new mongoose.Schema({
+const orders = new mongoose.Schema(
+  {
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+      required: true,
     },
     productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Products",
-        required: true
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Products",
+      required: true,
+    },
+    addressId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Address",
+      required: true,
+    },
+    productCost: {
+      type: [Number],
+      required: true,
     },
     quantity: {
-        type: Number,
-        required: true
+      type: [Number],
+      required: true,
     },
     productName: {
-        type: String,
-        required: true
+      type: [String],
+      required: true,
+    },
+    productImage: {
+      type: [String],
+      required: true,
+    },
+    status: {
+      type: String,
+      default: "Order Placed",
     },
     invoiceFileName: {
-        type: String,
-        required: true
+      type: String,
     },
     price: {
-        type: Number,
-        required: true
+      type: Number,
+      required: true,
     },
-    isOnTheWay: {
-        type: Boolean,
-        default: false
+    razorpay_order_id: {
+      type: String,
     },
-    way: {
-        type: [String],
-        default: []
+    razorpay_payment_id: {
+      type: String,
     },
-    isDelivered: {
-        type: Boolean,
-        default: false
+    razorpay_signature: {
+      type: String,
+    },
+    payment_successful: {
+      type: Boolean,
+      default: false,
+    },
+    order_placed: {
+      type: String,
+    },
+    packed: {
+      type: String,
+    },
+    outForDelivery: {
+      type: String,
+    },
+    shipped: {
+      type: String,
+    },
+    cancelled: {
+      type: Boolean,
+      default: false,
+    },
+    awb: {
+      type: String,
+      default: "",
+    },
+    delivered: {
+      type: String,
     },
     isReturned: {
-        type: Boolean,
-        default: false
-    }
-}, {
-    timestamps: true
-});
+      type: Boolean,
+      default: false,
+    },
+    paymentMode: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 exports.Orders = mongoose.model("Orders", orders);
