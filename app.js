@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const userRouter = require("./routes/users.js");
 const paymentRouter = require("./routes/payment.js");
 const ordersRouter = require("./routes/orders.js");
+const shipOrdersRouter = require("./routes/shiprocket/orders.js");
 const productsRouter = require("./routes/products.js");
 const addressRouter = require("./routes/address.js");
 const sliderRouter = require("./routes/slider.js");
@@ -54,8 +55,11 @@ app.use("/api/v1/indentifier", who_i_am);
 // Use the user router
 app.use("/api/v1/user", userRouter);
 
-// Use the user router
+// Use the Address router
 app.use("/api/v1/address", addressRouter);
+
+// Use the Shiproket router
+app.use("/api/v1/shiprocket", addressRouter);
 
 // Use the tags router
 app.use("/api/v1/tags", tagsRouter);
