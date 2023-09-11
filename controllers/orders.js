@@ -81,7 +81,10 @@ exports.createOrder = async (req, res) => {
         categoryMap.set(categoryName, productQuantity);
       }
 
+      console.log(productQuantity);
+
       product.quantity = product.quantity - productQuantity;
+      product.sold = product.sold + productQuantity;
       await product.save();
     }
     const savedOrder = await order.save({ session: sess });
