@@ -201,6 +201,8 @@ const getOneProduct = async (req, res) => {
   const { productId } = req.params;
   try {
     const product = await Products.findById(productId);
+    product.viewCount = product.viewCount + 1;
+    await product.save();
     !product
       ? res.status(404).json({ message: "Product not found erorr 404" })
       : res.status(200).json(product);
