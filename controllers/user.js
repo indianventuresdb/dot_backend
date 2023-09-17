@@ -329,3 +329,27 @@ exports.usersNumbers = async (req, res) => {
     return res.status(300).json({ message: "fail to count" });
   }
 };
+
+// Check user
+
+exports.verifyUser = async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res
+      .status(402)
+      .json({ success: false, message: "You are not logged in" });
+  }
+
+  try {
+    const decoded = jwt.verify(atob(token), process.env.JWT_SECRET);
+    // If decoding is successful, respond with the decoded token.
+    const user = await Users.findById(decoded._id);
+    !user
+      ? res.status(404).json({ success: false })
+      : res.status(200).json({ success: true, userType: user.adminType });
+  } catch (error) {
+    // If there's an error (e.g., token is invalid or expired), handle it gracefully.
+    res.status(401).json({ success: false, message: "Invalid token" });
+  }
+};

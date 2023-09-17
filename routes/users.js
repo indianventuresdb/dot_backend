@@ -10,6 +10,7 @@ const {
   deleteUser,
   usersNumbers,
   userProfile,
+  verifyUser,
 } = require("../controllers/user.js");
 // const { isAuthenticated } = require("../middlewares/auth.js");
 const {
@@ -24,6 +25,8 @@ router.post("/register", register);
 router.post("/login", login);
 
 router.post("/login_admin", loginAdmin);
+
+router.post("/verifyUserType", verifyUser);
 
 router.delete("/delete/:userId", deleteUser);
 
