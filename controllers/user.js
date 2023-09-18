@@ -221,6 +221,7 @@ exports.loginAdmin = async (req, res) => {
             "Your account is not verified. Please check your email and verify your account.",
         });
       }
+      
       sendTokenAdmin(
         user,
         res,
