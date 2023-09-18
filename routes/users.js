@@ -11,8 +11,11 @@ const {
   usersNumbers,
   userProfile,
   verifyUser,
+  resetPasswordOtp,
+  resetPassword,
+  updateProfile,
 } = require("../controllers/user.js");
-// const { isAuthenticated } = require("../middlewares/auth.js");
+const { isAuthenticated } = require("../middlewares/auth.js");
 const {
   isLoginData,
   isRegisterData,
@@ -41,5 +44,11 @@ router.get("/counts", usersNumbers);
 router.get("/getusers/:adminType", fetchUsers);
 
 router.get("/detail/:id", userProfile);
+
+router.post("/update", isAuthenticated, updateProfile);
+
+router.post("/resetPasswordOtp", resetPasswordOtp);
+
+router.post("/resetPassword", resetPassword);
 
 module.exports = router;

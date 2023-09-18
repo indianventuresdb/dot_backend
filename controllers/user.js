@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const generateOTP = require("../utils/otpGenerator.js");
 const { sendSMS } = require("../utils/smsSender.js");
+const sendOTPByEmail = require("../utils/sendOTPByEmail.js");
 
 const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
   let token;
@@ -44,41 +45,42 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
 // User Register Controller
 exports.register = async (req, res) => {
   const { name, email, phone, password } = req.body;
-  const phone_OTP = generateOTP();
-  const data = {
-    Text: `User Admin login OTP is ${phone_OTP} - SMSCOU`,
-    Number: `${phone}`,
-    SenderId: "SMSCOU",
-    DRNotifyUrl: process.env.NOTIFY_HANDLER,
-    DRNotifyHttpMethod: "POST",
-    Tool: "API",
-  };
+  const email_OTP = generateOTP(); // Generate OTP for email
+
   try {
     const user = await Users.findOne({ phone });
     if (!user) {
       const hashedPassword = await bcrypt.hash(password, 10);
       if (hashedPassword) {
-        // Sending Verification otp to the User
-        const otp = await sendSMS(res, data);
-        // Otp sent
-        const user = await Users.create({
-          name,
-          email,
-          phone,
-          phone_OTP: phone_OTP.toString(),
-          password: hashedPassword,
-        });
-        if (user) {
-          sendToken(
-            user,
-            res,
-            "Account Created successfully. Please check your phone and verify your account.",
-            200
-          );
+        // Sending Verification OTP to the User's Email
+        const otpEmailResult = await sendOTPByEmail(email, email_OTP);
+        console.log(otpEmailResult);
+        if (otpEmailResult.success) {
+          // OTP sent successfully via email
+          const user = await Users.create({
+            name,
+            email,
+            phone,
+            phone_OTP: email_OTP.toString(), // Store email OTP in the database
+            password: hashedPassword,
+          });
+          if (user) {
+            sendToken(
+              user,
+              res,
+              "Account Created successfully. Please check your email and verify your account.",
+              200
+            );
+          } else {
+            return res.status(500).json({
+              status: false,
+              message: "Database server failed, Please try again.",
+            });
+          }
         } else {
           return res.status(500).json({
             status: false,
-            message: "Database server failed, Please try again.",
+            message: "Failed to send OTP via email.",
           });
         }
       }
@@ -88,7 +90,6 @@ exports.register = async (req, res) => {
         .json({ status: false, message: "User already registered." });
     }
   } catch (error) {
-    console.log("Here is error caught: ", error);
     if (!res.headersSent) {
       return res.status(500).json({
         status: false,
@@ -331,7 +332,6 @@ exports.usersNumbers = async (req, res) => {
 };
 
 // Check user
-
 exports.verifyUser = async (req, res) => {
   const { token } = req.body;
 
@@ -351,5 +351,72 @@ exports.verifyUser = async (req, res) => {
   } catch (error) {
     // If there's an error (e.g., token is invalid or expired), handle it gracefully.
     res.status(401).json({ success: false, message: "Invalid token" });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  const userId = req.user;
+  const { name, email, phone, oldpwd, password } = req.body;
+
+  try {
+    const user = await Users.findById(userId).select("+password");
+    const isPasswordValid = await bcrypt.compare(oldpwd, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+
+    user.name = name;
+    user.email = email;
+    user.phone = phone;
+    user.password = await bcrypt.hash(password, 10);
+
+    await user.save();
+    res.status(201).json({ message: "User information updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error" });
+  }
+};
+
+exports.resetPasswordOtp = async (req, res) => {
+  const { email } = req.body;
+  const phone_OTP = generateOTP();
+  try {
+    const user = await Users.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const response = await sendOTPByEmail(email, phone_OTP);
+    if (!response.success) console.error("Failed to send OTP:", response.error);
+    user.phone_OTP = phone_OTP;
+    await user.save();
+    res.status(200).json({ message: "Otp Sent" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { email, otp, password } = req.body;
+
+  try {
+    const user = await Users.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.phone_OTP !== otp) {
+      return res.status(404).json({ message: "Incorrect Otp" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error" });
   }
 };
