@@ -5,16 +5,16 @@ async function sendOTPByEmail(email, otp) {
     const transporter = nodemailer.createTransport({
       service: "GMAIL",
       auth: {
-        user: "garudasofttech0@gmail.com",
-        pass: "nnkknkyznyyadocf",
+        user: process.env.USER_E_MAIL,
+        pass: process.env.USER_PASS,
       },
     });
 
     const mailOptions = {
       from: "garudasofttech0@gmail.com",
       to: email,
-      subject: "Your OTP Code",
-      text: `Your OTP code is: ${otp}`,
+      subject: "Augse OTP Verification Code",
+      text: `Please use this one-time password for Augse User Account Verification: ${otp}. DO NOT SHARE THIS WITH ANYONE and it is valid for 5 minutes only.`,
     };
 
     await transporter.sendMail(mailOptions);
