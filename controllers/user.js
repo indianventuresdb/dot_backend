@@ -19,7 +19,7 @@ const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
       httpOnly: true, // Cookie can only be accessed by the server, not JavaScript in the browser
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
       secure: process.env.NODE_ENV === "production", // Set to true in production for HTTPS
-      sameSite: "strict", // Restrict cookie to same-site requests
+      sameSite: "none", // Restrict cookie to same-site requests
     });
   } catch (error) {
     // Handle error here
@@ -49,7 +49,7 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
       path: "/", // Set the cookie's path to the root ("/") so it's accessible from any path
       httpOnly: true, // Cookie can only be accessed by the server, not JavaScript in the browser
       secure: process.env.NODE_ENV === "production", // Set to true in production for HTTPS
-      sameSite: "strict", // Restrict cookie to same-site requests
+      sameSite: "none", // Restrict cookie to same-site requests
     })
     .status(statusCode)
     .json({ userType: path });
