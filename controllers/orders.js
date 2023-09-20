@@ -3,6 +3,8 @@ const { Orders } = require("../models/orders.js");
 const { Products } = require("../models/products.js");
 const { Users } = require("../models/users.js");
 const { Sales } = require("../models/sales.js");
+const { Address } = require("../models/address.js");
+const generateInvoice = require("../utils/generateInvoice.js");
 const generateDailyKey = require("../utils/dailyKey.js");
 const calculateAmount = require("../utils/calculateAmount");
 
@@ -87,9 +89,6 @@ exports.createOrder = async (req, res) => {
       product.sold = product.sold + productQuantity;
       await product.save();
     }
-    const savedOrder = await order.save({ session: sess });
-    user.orders.push(order);
-    await user.save({ session: sess });
 
     const dailyKey = generateDailyKey();
     const dailySales = await Sales.findOne({ dateKey: dailyKey });
@@ -115,12 +114,31 @@ exports.createOrder = async (req, res) => {
       }
       await dailySales.save();
     }
+
+    const address = await Address.findById(addressId);
+
+    const outputPath = `invoices/invoice_${Math.random()}.pdf`;
+    console.log(products);
+
+    generateInvoice(order._id, address, products, outputPath)
+      .then(() => {
+        console.log("Invoice generated successfully.");
+      })
+      .catch((error) => {
+        console.error("Error generating invoice:", error);
+      });
+
+    console.log(products);
+    order.invoiceFileName = outputPath;
+    const savedOrder = await order.save({ session: sess });
+    user.orders.push(order);
+    await user.save({ session: sess });
     await sess.commitTransaction();
 
     res.status(201).json({ orderId: savedOrder._id });
   } catch (error) {
     await sess.abortTransaction();
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
