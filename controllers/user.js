@@ -45,7 +45,7 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
 
   res
     .cookie("token", token, {
-      maxAge: 120 * 60 * 1000, // Set the cookie's max age to 120 minutes
+      maxAge: 120 * 60 * 1000 * 6, // Set the cookie's max age to 120 minutes
       path: "/", // Set the cookie's path to the root ("/") so it's accessible from any path
       httpOnly: true, // Cookie can only be accessed by the server, not JavaScript in the browser
       secure: process.env.NODE_ENV === "production", // Set to true in production for HTTPS
