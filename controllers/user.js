@@ -13,7 +13,17 @@ const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );
-  } catch (error) {}
+
+    // Set the JWT token as a cookie
+    res.cookie("token", token, {
+      httpOnly: true, // Cookie can only be accessed by the server, not JavaScript in the browser
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
+      secure: process.env.NODE_ENV === "production", // Set to true in production for HTTPS
+      sameSite: "strict", // Restrict cookie to same-site requests
+    });
+  } catch (error) {
+    // Handle error here
+  }
 
   if (!user.isPhoneVerified) {
     return res.status(200).json({
@@ -34,12 +44,15 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
 
   res
-    .status(statusCode)
     .cookie("token", token, {
-      maxAge: 120 * 60 * 1000,
-      path: "/",
+      maxAge: 120 * 60 * 1000, // Set the cookie's max age to 120 minutes
+      path: "/", // Set the cookie's path to the root ("/") so it's accessible from any path
+      httpOnly: true, // Cookie can only be accessed by the server, not JavaScript in the browser
+      secure: process.env.NODE_ENV === "production", // Set to true in production for HTTPS
+      sameSite: "strict", // Restrict cookie to same-site requests
     })
-    .json({ path });
+    .status(statusCode)
+    .json({ userType: path });
 };
 
 // User Register Controller
@@ -187,20 +200,7 @@ exports.loginAdmin = async (req, res) => {
             "Your account is not verified. Please check your email and verify your account.",
         });
       }
-      sendTokenAdmin(
-        user,
-        res,
-        user.adminType === "admin"
-          ? "dashboard"
-          : user.adminType === "seller"
-          ? "seller"
-          : user.adminType === "delivery"
-          ? "delivery"
-          : user.adminType === "accountant"
-          ? "accountant"
-          : "/",
-        200
-      );
+      sendTokenAdmin(user, res, user.adminType, 200);
     } else {
       const user = await Users.findOne({ email }).select("+password");
       if (!user) {
@@ -224,15 +224,7 @@ exports.loginAdmin = async (req, res) => {
       sendTokenAdmin(
         user,
         res,
-        user.adminType === "admin"
-          ? "dashboard"
-          : user.adminType === "seller"
-          ? "seller"
-          : user.adminType === "delivery"
-          ? "delivery"
-          : user.adminType === "accountant"
-          ? "accountant"
-          : "/",
+        user.adminType,
         200
       );
     }
