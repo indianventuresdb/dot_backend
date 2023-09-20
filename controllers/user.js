@@ -58,7 +58,7 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
       sameSite: "none", // Restrict cookie to same-site requests
     })
     .status(statusCode)
-    .json({ userType: path });
+    .json({ userType: path, token: btoa(token) });
 };
 
 // User Register Controller
