@@ -4,6 +4,8 @@ const { Products } = require("../models/products.js");
 const { Users } = require("../models/users.js");
 const { Sales } = require("../models/sales.js");
 const { Address } = require("../models/address.js");
+const path = require("path");
+const fs = require("fs");
 const generateInvoice = require("../utils/generateInvoice.js");
 const generateDailyKey = require("../utils/dailyKey.js");
 const calculateAmount = require("../utils/calculateAmount");
@@ -17,7 +19,7 @@ exports.createOrder = async (req, res) => {
 
   let price = 0;
   try {
-    price = await calculateAmount(products);
+    price = (await calculateAmount(products)) + 60;
   } catch (error) {
     return res
       .status(404)
@@ -117,10 +119,21 @@ exports.createOrder = async (req, res) => {
 
     const address = await Address.findById(addressId);
 
-    const outputPath = `invoices/invoice_${Math.random()}.pdf`;
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+    const folderName = `${year}-${month}`;
+    const folderPath = path.join("invoices", folderName);
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
+    }
+    const fullOutputPath = path.join(
+      folderPath,
+      `invoice_${Math.random()}.pdf`
+    );
     console.log(products);
 
-    generateInvoice(order._id, address, products, outputPath)
+    generateInvoice(order._id, address, products, fullOutputPath)
       .then(() => {
         console.log("Invoice generated successfully.");
       })
@@ -129,7 +142,7 @@ exports.createOrder = async (req, res) => {
       });
 
     console.log(products);
-    order.invoiceFileName = outputPath;
+    order.invoiceFileName = fullOutputPath;
     const savedOrder = await order.save({ session: sess });
     user.orders.push(order);
     await user.save({ session: sess });

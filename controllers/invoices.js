@@ -1,7 +1,7 @@
 const { Orders } = require("../models/orders.js");
 const fs = require("fs");
 const path = require("path");
-const generateInvoice = require("../utils/generateInvoice.js");
+const archiver = require("archiver");
 
 const getInvoiceFile = async (req, res) => {
   try {
@@ -32,23 +32,28 @@ const getInvoiceFile = async (req, res) => {
 };
 
 const multi_Download_Invoice = async (req, res) => {
-  res.status(200).json({ message: "This api is under development." });
-};
+  const currentDate = new Date();
 
-const generate = async (req, res) => {
-  const outputPath = `invoices/invoice_0.4885354587472781.pdf`;
+  const year = currentDate.getFullYear();
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
 
-  generateInvoice("retgdfyjhuki", outputPath)
-    .then(() => {
-      res.status(200).json({ message: "Invoice generated successfully" });
-    })
-    .catch((error) => {
-      res.status(200).json({ message: error });
+  const folderName = `${year}-${month}`;
+  const folderPath = path.join(__dirname, "../invoices", folderName);
+
+  if (fs.existsSync(folderPath)) {
+    const output = res.attachment(`Invoices_${folderName}.zip`);
+    const archive = archiver("zip", {
+      zlib: { level: 9 },
     });
+    archive.pipe(output);
+    archive.directory(folderPath, folderName);
+    archive.finalize();
+  } else {
+    res.status(404).json({ error: "No invoices found for the current month." });
+  }
 };
 
 module.exports = {
   getInvoiceFile,
   multi_Download_Invoice,
-  generate,
 };

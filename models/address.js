@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 
 const address = new mongoose.Schema(
   {
+    name: {
+      type: String,
+    },
     houseNumber: {
       type: String,
       required: true,
@@ -25,6 +28,9 @@ const address = new mongoose.Schema(
     phone: {
       type: String,
       required: true,
+    },
+    email: {
+      type: String,
     },
     city: {
       type: String,
