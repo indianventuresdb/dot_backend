@@ -81,7 +81,7 @@ function generateInvoice(orderID, address, products, outputPath) {
       .rect(headerX + 2 * cellWidth, rowY, cellWidth, cellHeight)
       .fillAndStroke("lightgray", "black");
     doc.fillColor("black");
-    doc.text("Price", headerX + 2 * cellWidth + 10, rowY + 10);
+    doc.text("MRP", headerX + 2 * cellWidth + 10, rowY + 10);
 
     doc
       .rect(headerX + 3 * cellWidth, rowY, cellWidth, cellHeight)
@@ -93,12 +93,21 @@ function generateInvoice(orderID, address, products, outputPath) {
       .rect(headerX + 4 * cellWidth, rowY, cellWidth, cellHeight)
       .fillAndStroke("lightgray", "black");
     doc.fillColor("black");
-    doc.text("Total", headerX + 4 * cellWidth + 10, rowY + 10);
+    doc.text("Price", headerX + 4 * cellWidth + 10, rowY + 10);
 
     doc.fillColor("black");
     rowY += cellHeight;
+    const productsPerPage = 15;
+    let currentPageProducts = 5;
     products.forEach((item, index) => {
-      const height = Math.ceil((item.name.length + 1) / 20);
+      const height = Math.ceil((item.name.length + 1) / 15);
+      currentPageProducts++;
+
+      if (currentPageProducts >= productsPerPage) {
+        doc.addPage();
+        currentPageProducts = 0;
+        rowY = 20;
+      }
       doc
         .rect(headerX, rowY, cellWidth, cellHeight + 20 * (height - 1))
         .stroke();
@@ -123,7 +132,7 @@ function generateInvoice(orderID, address, products, outputPath) {
         )
         .stroke();
       doc.text(
-        `${formatToINR(item.price)}`,
+        `${formatToINR(item.mrp)}`,
         headerX + 2 * cellWidth + 10,
         rowY + 10
       );
@@ -137,7 +146,7 @@ function generateInvoice(orderID, address, products, outputPath) {
         )
         .stroke();
       doc.text(
-        `${formatToINR(item.price)}`,
+        `${formatToINR(item.mrp - item.price)}`,
         headerX + 3 * cellWidth + 10,
         rowY + 10
       );
@@ -170,8 +179,9 @@ function generateInvoice(orderID, address, products, outputPath) {
       doc.y + 30
     );
     doc.text(`Courier Charge: ${formatToINR(60)}`);
-    doc.text(`GST: ${formatToINR(totalAmount.toFixed(2))}`);
-    doc.text(`Total Amount: ${formatToINR(totalAmount.toFixed(2))}`);
+    const gst = totalAmount * 0.12;
+    doc.text(`GST: ${formatToINR(gst.toFixed(2))}`);
+    doc.text(`Total Amount: ${formatToINR(gst + totalAmount)}`);
 
     doc.end();
 

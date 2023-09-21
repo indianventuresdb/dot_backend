@@ -85,8 +85,6 @@ exports.createOrder = async (req, res) => {
         categoryMap.set(categoryName, productQuantity);
       }
 
-      console.log(productQuantity);
-
       product.quantity = product.quantity - productQuantity;
       product.sold = product.sold + productQuantity;
       await product.save();
@@ -131,8 +129,8 @@ exports.createOrder = async (req, res) => {
       folderPath,
       `invoice_${Math.random()}.pdf`
     );
-    console.log(products);
 
+    console.log(order._id);
     generateInvoice(order._id, address, products, fullOutputPath)
       .then(() => {
         console.log("Invoice generated successfully.");
