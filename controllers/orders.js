@@ -17,9 +17,16 @@ exports.createOrder = async (req, res) => {
   const addressId = req.body.addressId;
   const paymentMode = req.body.paymentMode;
 
-  let price = 0;
+  let price = 0,
+    isReturnable = true,
+    isCancelable = true;
   try {
-    price = (await calculateAmount(products)) + 60;
+    let arr = await calculateAmount(products);
+    price = arr[0];
+    cost = arr[3];
+    if (cost < 500) price = parseFloat(price) + 60;
+    isReturnable = arr[1];
+    isCancelable = arr[2];
   } catch (error) {
     return res
       .status(404)
@@ -59,6 +66,9 @@ exports.createOrder = async (req, res) => {
       price,
       productImage,
       paymentMode,
+      isReturnable,
+      isCancelable,
+      order_placed: new Date(),
     });
     sess = await mongoose.startSession();
     sess.startTransaction();
@@ -139,7 +149,6 @@ exports.createOrder = async (req, res) => {
         console.error("Error generating invoice:", error);
       });
 
-    console.log(products);
     order.invoiceFileName = fullOutputPath;
     const savedOrder = await order.save({ session: sess });
     user.orders.push(order);
@@ -148,6 +157,7 @@ exports.createOrder = async (req, res) => {
 
     res.status(201).json({ orderId: savedOrder._id });
   } catch (error) {
+    console.log(error);
     await sess.abortTransaction();
     res.status(500).json({ error: error.message });
   }
@@ -212,13 +222,33 @@ exports.updateOrder = async (req, res) => {
 };
 
 // Delete an order
-exports.deleteOrder = async (req, res) => {
+exports.cancelOrder = async (req, res) => {
+  const { id } = req.params;
   try {
-    const deletedOrder = await Orders.findByIdAndRemove(req.params.id);
-    if (!deletedOrder) {
-      return res.status(404).json({ message: "Order not found" });
+    const order = await Orders.findById(id);
+    if (!order.isCancelable || order.delivered) {
+      return res.status(404).json({ message: "Order is not returnable" });
     }
-    res.status(200).json({ message: "Order deleted" });
+    order.cancelled = true;
+    order.status = "Cancelled";
+    await order.save();
+    res.status(200).json({ message: "Order Canceled" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.returnOrder = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const order = await Orders.findById(id);
+    if (!order.isReturnable || !order.delivered) {
+      return res.status(404).json({ message: "Order is not returnable" });
+    }
+    order.isReturned = true;
+    order.status = "Returned";
+    await order.save();
+    res.status(200).json({ message: "Order Returned" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

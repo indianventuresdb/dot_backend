@@ -1,6 +1,5 @@
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
-const calculateAmount = require("../utils/calculateAmount");
 const { Orders } = require("../models/orders.js");
 
 var instance = new Razorpay({
@@ -9,10 +8,11 @@ var instance = new Razorpay({
 });
 
 exports.checkOut = async (req, res) => {
-  const products = req.body.items;
-  const amount = await calculateAmount(products);
+  const { orderId } = req.body;
 
   try {
+    const orderData = await Orders.findById(orderId);
+    const amount = orderData.price;
     const options = {
       amount: amount * 100,
       currency: "INR",
