@@ -2,7 +2,6 @@ const { Users } = require("../models/users.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const generateOTP = require("../utils/otpGenerator.js");
-const { sendSMS } = require("../utils/smsSender.js");
 const sendOTPByEmail = require("../utils/sendOTPByEmail.js");
 
 const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
@@ -28,7 +27,6 @@ const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
   if (!user.isPhoneVerified) {
     return res.status(200).json({
       status: false,
-      token,
       id: user._id,
       message:
         "Your account is not verified. Please check your phone and verify your account.",
@@ -46,16 +44,15 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
   res.set({
     "Content-Type": "application/json",
     "set-cookie": `auth=${btoa(token)}`,
-    });
+  });
 
-  
   res
     .cookie("token", token, {
-      maxAge: 720 * 60 * 1000, // Set the cookie's max age to 120 minutes
-      path: "/", // Set the cookie's path to the root ("/") so it's accessible from any path
-      httpOnly: true, // Cookie can only be accessed by the server, not JavaScript in the browser
-      secure: process.env.NODE_ENV === "production", // Set to true in production for HTTPS
-      sameSite: "none", // Restrict cookie to same-site requests
+      maxAge: 720 * 60 * 1000,
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
     })
     .status(statusCode)
     .json({ userType: path, token: btoa(token) });
@@ -64,32 +61,30 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
 // User Register Controller
 exports.register = async (req, res) => {
   const { name, email, phone, password } = req.body;
-  const email_OTP = generateOTP(); // Generate OTP for email
+  const email_OTP = generateOTP();
 
   try {
     const user = await Users.findOne({ phone });
     if (!user) {
       const hashedPassword = await bcrypt.hash(password, 10);
       if (hashedPassword) {
-        // Sending Verification OTP to the User's Email
         const otpEmailResult = await sendOTPByEmail(email, email_OTP);
         console.log(otpEmailResult);
         if (otpEmailResult.success) {
-          // OTP sent successfully via email
           const user = await Users.create({
             name,
             email,
             phone,
-            phone_OTP: email_OTP.toString(), // Store email OTP in the database
+            phone_OTP: email_OTP.toString(),
             password: hashedPassword,
           });
           if (user) {
-            sendToken(
-              user,
-              res,
-              "Account Created successfully. Please check your email and verify your account.",
-              200
-            );
+            res.status(200).json({
+              status: false,
+              id: user._id,
+              message:
+                "Your account is not verified. Please check your phone and verify your account.",
+            });
           } else {
             return res.status(500).json({
               status: false,
@@ -123,7 +118,7 @@ exports.verify = async (req, res) => {
   const { id, otp } = req.params;
 
   try {
-    const user = await Users.findById(id);
+    let user = await Users.findById(id);
     if (!user) {
       return res
         .status(300)
@@ -136,11 +131,17 @@ exports.verify = async (req, res) => {
     }
     console.log(user.phone_OTP + " " + otp);
     if (user.phone_OTP === otp) {
-      await Users.findOneAndUpdate({ _id: id }, { isPhoneVerified: true });
-      return res.status(200).json({
-        status: true,
-        message: `Congratulations ${user.name}, Your account Verified successfully.`,
-      });
+      const updated = await Users.findOneAndUpdate(
+        { _id: id },
+        { isPhoneVerified: true }
+      );
+      user = await Users.findById(id);
+      sendToken(
+        user,
+        res,
+        `Congratulations ${user.name}, Your account Verified successfully.`,
+        200
+      );
     } else {
       return res.status(200).json({
         status: false,
@@ -227,12 +228,7 @@ exports.loginAdmin = async (req, res) => {
             "Your account is not verified. Please check your email and verify your account.",
         });
       }
-      sendTokenAdmin(
-        user,
-        res,
-        user.adminType,
-        200
-      );
+      sendTokenAdmin(user, res, user.adminType, 200);
     }
   } catch (error) {
     return res
