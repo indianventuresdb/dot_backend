@@ -5,3 +5,4 @@ config.env
 yarn-error.log
 uploads/*.*
 invoices/*.*
+invoices
