@@ -62,45 +62,57 @@ function generateInvoice(orderID, address, products, outputPath) {
 
     let headerX = 50;
     let rowY = 320;
-    let cellWidth = 105;
+    let cellWidth = 87;
     let cellHeight = 30;
 
     doc
-      .rect(headerX, rowY, cellWidth, cellHeight)
+      .rect(headerX, rowY, cellWidth * 2, cellHeight)
       .fillAndStroke("lightgray", "black");
     doc.fillColor("black");
-    doc.text("Item", headerX + 10, rowY + 10);
-
-    doc
-      .rect(headerX + cellWidth, rowY, cellWidth, cellHeight)
-      .fillAndStroke("lightgray", "black");
-    doc.fillColor("black");
-    doc.text("Quantity", headerX + cellWidth + 10, rowY + 10);
+    doc.text("Item", headerX + 10, rowY + 10, {
+      width: 160,
+      align: "center",
+    });
 
     doc
       .rect(headerX + 2 * cellWidth, rowY, cellWidth, cellHeight)
       .fillAndStroke("lightgray", "black");
     doc.fillColor("black");
-    doc.text("MRP", headerX + 2 * cellWidth + 10, rowY + 10);
+    doc.text("Quantity", headerX + 2 * cellWidth + 10, rowY + 10, {
+      width: 67,
+      align: "center",
+    });
 
     doc
       .rect(headerX + 3 * cellWidth, rowY, cellWidth, cellHeight)
       .fillAndStroke("lightgray", "black");
     doc.fillColor("black");
-    doc.text("Discount", headerX + 3 * cellWidth + 10, rowY + 10);
+    doc.text("MRP (INR)", headerX + 3 * cellWidth + 10, rowY + 10, {
+      width: 67,
+      align: "center",
+    });
 
     doc
       .rect(headerX + 4 * cellWidth, rowY, cellWidth, cellHeight)
       .fillAndStroke("lightgray", "black");
     doc.fillColor("black");
-    doc.text("Price", headerX + 4 * cellWidth + 10, rowY + 10);
+    doc.text("Discount (INR)", headerX + 4 * cellWidth + 4, rowY + 10);
+
+    doc
+      .rect(headerX + 5 * cellWidth, rowY, cellWidth, cellHeight)
+      .fillAndStroke("lightgray", "black");
+    doc.fillColor("black");
+    doc.text("Price (INR)", headerX + 5 * cellWidth + 10, rowY + 10, {
+      width: 67,
+      align: "center",
+    });
 
     doc.fillColor("black");
     rowY += cellHeight;
     const productsPerPage = 15;
     let currentPageProducts = 5;
     products.forEach((item, index) => {
-      const height = Math.ceil((item.name.length + 1) / 15);
+      const height = Math.ceil((item.name.length + 1) / 30);
       currentPageProducts++;
 
       if (currentPageProducts >= productsPerPage) {
@@ -109,19 +121,9 @@ function generateInvoice(orderID, address, products, outputPath) {
         rowY = 20;
       }
       doc
-        .rect(headerX, rowY, cellWidth, cellHeight + 20 * (height - 1))
+        .rect(headerX, rowY, cellWidth * 2, cellHeight + 20 * (height - 1))
         .stroke();
-      doc.text(item.name, headerX + 10, rowY + 10, { width: 90 });
-
-      doc
-        .rect(
-          headerX + cellWidth,
-          rowY,
-          cellWidth,
-          cellHeight + 20 * (height - 1)
-        )
-        .stroke();
-      doc.text(item.quantity.toString(), headerX + cellWidth + 10, rowY + 10);
+      doc.text(item.name, headerX + 10, rowY + 10, { width: 160 });
 
       doc
         .rect(
@@ -132,9 +134,10 @@ function generateInvoice(orderID, address, products, outputPath) {
         )
         .stroke();
       doc.text(
-        `${formatToINR(item.mrp)}`,
+        item.quantity.toString(),
         headerX + 2 * cellWidth + 10,
-        rowY + 10
+        rowY + 10,
+        { width: 67, align: "right" }
       );
 
       doc
@@ -145,11 +148,10 @@ function generateInvoice(orderID, address, products, outputPath) {
           cellHeight + 20 * (height - 1)
         )
         .stroke();
-      doc.text(
-        `${formatToINR(item.mrp - item.price)}`,
-        headerX + 3 * cellWidth + 10,
-        rowY + 10
-      );
+      doc.text(`${item.mrp}`, headerX + 3 * cellWidth + 10, rowY + 10, {
+        width: 67,
+        align: "right",
+      });
 
       doc
         .rect(
@@ -160,10 +162,24 @@ function generateInvoice(orderID, address, products, outputPath) {
         )
         .stroke();
       doc.text(
-        `${formatToINR(item.price)}`,
+        `${item.mrp - item.price}`,
         headerX + 4 * cellWidth + 10,
-        rowY + 10
+        rowY + 10,
+        { width: 67, align: "right" }
       );
+
+      doc
+        .rect(
+          headerX + 5 * cellWidth,
+          rowY,
+          cellWidth,
+          cellHeight + 20 * (height - 1)
+        )
+        .stroke();
+      doc.text(`${item.price}`, headerX + 5 * cellWidth + 10, rowY + 10, {
+        width: 67,
+        align: "right",
+      });
 
       rowY += cellHeight + 20 * (height - 1);
     });
@@ -173,15 +189,50 @@ function generateInvoice(orderID, address, products, outputPath) {
       return accumulator + currentItem.price;
     }, 0);
 
-    doc.text(
-      `Sub Total: ${formatToINR(totalAmount.toFixed(2))}`,
-      400,
-      doc.y + 30
-    );
-    doc.text(`Courier Charge: ${formatToINR(60)}`);
+    let y = doc.y + 20;
+    let x = 400;
+
+    doc.rect(x, y, cellWidth, cellHeight).stroke();
+    doc.text(`Sub Total`, x + 5, y + 10);
+    doc.rect(x + cellWidth, y, cellWidth, cellHeight).stroke();
+    doc.text(` ${totalAmount.toFixed(2)}`, x + cellWidth + 5, y + 10, {
+      width: 77,
+      align: "right",
+    });
+    y += cellHeight;
+
+    const delivery = totalAmount > 499 ? 0 : 60;
+    doc.rect(x, y, cellWidth, cellHeight).stroke();
+    doc.text(`Courier Charge`, x + 2, y + 10);
+    doc.rect(x + cellWidth, y, cellWidth, cellHeight).stroke();
+    doc.text(`${delivery}`, x + cellWidth + 5, y + 10, {
+      width: 77,
+      align: "right",
+    });
+    y += cellHeight;
+
     const gst = totalAmount * 0.12;
-    doc.text(`GST: ${formatToINR(gst.toFixed(2))}`);
-    doc.text(`Total Amount: ${formatToINR(gst + totalAmount)}`);
+    doc.rect(x, y, cellWidth, cellHeight).stroke();
+    doc.text("GST", x + 5, y + 10);
+    doc.rect(x + cellWidth, y, cellWidth, cellHeight).stroke();
+    doc.text(`${gst.toFixed(2)}`, x + cellWidth + 5, y + 10, {
+      width: 77,
+      align: "right",
+    });
+    y += cellHeight;
+
+    doc.rect(x, y, cellWidth, cellHeight).stroke();
+    doc.text("Total Amount", x + 5, y + 10);
+    doc.rect(x + cellWidth, y, cellWidth, cellHeight).stroke();
+    doc.text(
+      `${(gst + totalAmount + delivery).toFixed(2)}`,
+      x + cellWidth + 5,
+      y + 10,
+      {
+        width: 77,
+        align: "right",
+      }
+    );
 
     doc.end();
 
