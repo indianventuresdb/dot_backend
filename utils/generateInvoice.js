@@ -1,7 +1,6 @@
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const generateDailyKey = require("./dailyKey");
-const formatToINR = require("./formatToINR");
 
 function generateInvoice(orderID, address, products, outputPath) {
   let stream;
@@ -24,7 +23,7 @@ function generateInvoice(orderID, address, products, outputPath) {
 
     // Left column (for image)
     const leftColumnWidth = 100;
-    doc.image("images/DOT_logo.jpg", 40, 20, { width: leftColumnWidth });
+    doc.image("images/DOT_logo.png", 40, 20, { width: leftColumnWidth });
 
     // Right column (for seller address)
     const rightColumnX = 400;
