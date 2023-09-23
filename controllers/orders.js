@@ -18,6 +18,7 @@ exports.createOrder = async (req, res) => {
   const paymentMode = req.body.paymentMode;
 
   let price = 0,
+    cost = 0,
     isReturnable = true,
     isCancelable = true;
   try {
@@ -230,7 +231,7 @@ exports.cancelOrder = async (req, res) => {
       return res.status(404).json({ message: "Order is not returnable" });
     }
     order.cancelled = true;
-    order.status = "Cancelled";
+    order.status = "Order Cancelled";
     await order.save();
     res.status(200).json({ message: "Order Canceled" });
   } catch (error) {
@@ -246,7 +247,7 @@ exports.returnOrder = async (req, res) => {
       return res.status(404).json({ message: "Order is not returnable" });
     }
     order.isReturned = true;
-    order.status = "Returned";
+    order.status = "Order Returned";
     await order.save();
     res.status(200).json({ message: "Order Returned" });
   } catch (error) {

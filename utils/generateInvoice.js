@@ -185,7 +185,7 @@ function generateInvoice(orderID, address, products, outputPath) {
 
     doc.moveDown();
     const totalAmount = products.reduce((accumulator, currentItem) => {
-      return accumulator + currentItem.price;
+      return accumulator + currentItem.price * currentItem.quantity;
     }, 0);
 
     let y = doc.y + 20;
