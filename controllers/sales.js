@@ -87,8 +87,42 @@ const getCategorywiseSalesInParticularTime = async (req, res) => {
   }
 };
 
+const monthlySales = async (req, res) => {
+  const year = parseInt(req.params.year);
+  try {
+    const result = await Sales.aggregate([
+      {
+        $match: {
+          $expr: {
+            $eq: [{ $year: { $toDate: "$dateKey" } }, year],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: { $toDate: "$dateKey" } },
+          totalSales: { $sum: "$sales" },
+        },
+      },
+    ]);
+
+    const monthlySales = Array(12).fill(0);
+
+    result.forEach((item) => {
+      const month = item._id - 1; 
+      monthlySales[month] = item.totalSales;
+    });
+
+    res.status(200).json({ monthlySales });
+  } catch (error) {
+    console.error("Error finding yearly sales:", error);
+    res.status(404).json({ message: error });
+  }
+};
+
 module.exports = {
   getSales,
   getCategorywiseSales,
   getCategorywiseSalesInParticularTime,
+  monthlySales,
 };

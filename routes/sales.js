@@ -3,6 +3,7 @@ const {
   getSales,
   getCategorywiseSales,
   getCategorywiseSalesInParticularTime,
+  monthlySales,
 } = require("../controllers/sales");
 
 const router = express.Router();
@@ -15,5 +16,7 @@ router.get(
   "/:startDate/:endDate/category",
   getCategorywiseSalesInParticularTime
 );
+
+router.get("/monthlySales/:year", monthlySales);
 
 module.exports = router;
