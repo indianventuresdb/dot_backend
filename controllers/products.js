@@ -169,7 +169,7 @@ const updateProducts = async (req, res) => {
 // get All products from database and send to Browser
 const getProducts = async (req, res) => {
   try {
-    const products = await Products.find();
+    const products = await Products.find({});
     !products
       ? res.status(404).json({ message: "Products not found." })
       : res.status(200).json(products);
