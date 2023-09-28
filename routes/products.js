@@ -3,7 +3,8 @@ const express = require("express");
 // const { isSeller } = require("../middlewares/isSeller.js");
 const {
   addProducts,
-  removeProducts,
+  hideProducts,
+  showProducts,
   updateProducts,
   getProducts,
   searchProducts,
@@ -17,7 +18,8 @@ const {
 const router = express.Router();
 
 router.post("/add_product", addProducts);
-router.delete("/remove_product/:productId", removeProducts);
+router.put("/hide_product/:productId", hideProducts);
+router.put("/show_product/:productId", showProducts);
 router.put("/update_product/:productId", updateProducts);
 router.post("/addimage", addImage);
 router.post("/deleteimage", deleteImage);

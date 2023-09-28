@@ -79,27 +79,31 @@ const deleteImage = async (req, res) => {
 };
 
 // Remove Product from database
-const removeProducts = async (req, res) => {
+const hideProducts = async (req, res) => {
   const { productId } = req.params;
-
   try {
-    const product = await Products.findByIdAndDelete(productId);
+    const product = await Products.findByIdAndUpdate(productId, {
+      visibility: false,
+    });
 
-    if (product) {
-      fs.unlink(product.mainImage, (err) => {
-        console.log(err);
-      });
-      for (let i = 0; i < product.otherImages.length; i++) {
-        if (!product.otherImages[i]) continue;
-        fs.unlink(product.otherImages[i], (err) => {
-          console.log(err);
-        });
-      }
-    }
-    // Turnory operator
+    !product
+      ? res.status(300).json({ message: "Product Can not hide." })
+      : res.status(200).json({ message: "Product successfully hidden" });
+  } catch (error) {
+    res.status(300).json({ message: "Product Can not deleted." });
+  }
+};
+
+const showProducts = async (req, res) => {
+  const { productId } = req.params;
+  try {
+    const product = await Products.findByIdAndUpdate(productId, {
+      visibility: true,
+    });
+
     !product
       ? res.status(300).json({ message: "Product Can not deleted." })
-      : res.status(200).json({ message: "Product successfully deleted." });
+      : res.status(200).json({ message: "Product successfully" });
   } catch (error) {
     res.status(300).json({ message: "Product Can not deleted." });
   }
@@ -239,7 +243,8 @@ const productOfParticularCategory = async (req, res) => {
 
 module.exports = {
   addProducts,
-  removeProducts,
+  hideProducts,
+  showProducts,
   addImage,
   updateProducts,
   getProducts,
