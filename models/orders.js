@@ -88,6 +88,14 @@ const orders = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isReturnable: {
+      type: Boolean,
+      required: true,
+    },
+    isCancelable: {
+      type: Boolean,
+      required: true,
+    },
   },
   {
     timestamps: true,

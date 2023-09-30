@@ -4,6 +4,8 @@ const { Products } = require("../models/products.js");
 const { Users } = require("../models/users.js");
 const { Sales } = require("../models/sales.js");
 const { Address } = require("../models/address.js");
+const path = require("path");
+const fs = require("fs");
 const generateInvoice = require("../utils/generateInvoice.js");
 const generateDailyKey = require("../utils/dailyKey.js");
 const calculateAmount = require("../utils/calculateAmount");
@@ -15,9 +17,17 @@ exports.createOrder = async (req, res) => {
   const addressId = req.body.addressId;
   const paymentMode = req.body.paymentMode;
 
-  let price = 0;
+  let price = 0,
+    cost = 0,
+    isReturnable = true,
+    isCancelable = true;
   try {
-    price = await calculateAmount(products);
+    let arr = await calculateAmount(products);
+    price = arr[0];
+    cost = arr[3];
+    if (cost < 500) price = parseFloat(price) + 60;
+    isReturnable = arr[1];
+    isCancelable = arr[2];
   } catch (error) {
     return res
       .status(404)
@@ -57,6 +67,9 @@ exports.createOrder = async (req, res) => {
       price,
       productImage,
       paymentMode,
+      isReturnable,
+      isCancelable,
+      order_placed: new Date(),
     });
     sess = await mongoose.startSession();
     sess.startTransaction();
@@ -82,8 +95,6 @@ exports.createOrder = async (req, res) => {
       } else {
         categoryMap.set(categoryName, productQuantity);
       }
-
-      console.log(productQuantity);
 
       product.quantity = product.quantity - productQuantity;
       product.sold = product.sold + productQuantity;
@@ -117,10 +128,21 @@ exports.createOrder = async (req, res) => {
 
     const address = await Address.findById(addressId);
 
-    const outputPath = `invoices/invoice_${Math.random()}.pdf`;
-    console.log(products);
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+    const folderName = `${year}-${month}`;
+    const folderPath = path.join("invoices", folderName);
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
+    }
+    const fullOutputPath = path.join(
+      folderPath,
+      `invoice_${Math.random()}.pdf`
+    );
 
-    generateInvoice(order._id, address, products, outputPath)
+    console.log(order._id);
+    generateInvoice(order._id, address, products, fullOutputPath)
       .then(() => {
         console.log("Invoice generated successfully.");
       })
@@ -128,8 +150,7 @@ exports.createOrder = async (req, res) => {
         console.error("Error generating invoice:", error);
       });
 
-    console.log(products);
-    order.invoiceFileName = outputPath;
+    order.invoiceFileName = fullOutputPath;
     const savedOrder = await order.save({ session: sess });
     user.orders.push(order);
     await user.save({ session: sess });
@@ -137,6 +158,7 @@ exports.createOrder = async (req, res) => {
 
     res.status(201).json({ orderId: savedOrder._id });
   } catch (error) {
+    console.log(error);
     await sess.abortTransaction();
     res.status(500).json({ error: error.message });
   }
@@ -201,13 +223,33 @@ exports.updateOrder = async (req, res) => {
 };
 
 // Delete an order
-exports.deleteOrder = async (req, res) => {
+exports.cancelOrder = async (req, res) => {
+  const { id } = req.params;
   try {
-    const deletedOrder = await Orders.findByIdAndRemove(req.params.id);
-    if (!deletedOrder) {
-      return res.status(404).json({ message: "Order not found" });
+    const order = await Orders.findById(id);
+    if (!order.isCancelable || order.delivered) {
+      return res.status(404).json({ message: "Order is not returnable" });
     }
-    res.status(200).json({ message: "Order deleted" });
+    order.cancelled = true;
+    order.status = "Order Cancelled";
+    await order.save();
+    res.status(200).json({ message: "Order Canceled" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.returnOrder = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const order = await Orders.findById(id);
+    if (!order.isReturnable || !order.delivered) {
+      return res.status(404).json({ message: "Order is not returnable" });
+    }
+    order.isReturned = true;
+    order.status = "Order Returned";
+    await order.save();
+    res.status(200).json({ message: "Order Returned" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

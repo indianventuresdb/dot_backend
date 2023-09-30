@@ -12,6 +12,8 @@ const addAddress = async (req, res) => {
     phone,
     houseNumber,
     pinCode,
+    name,
+    email,
   } = req.body;
   const userId = req.user;
 
@@ -38,6 +40,8 @@ const addAddress = async (req, res) => {
       phone,
       houseNumber,
       pinCode,
+      name,
+      email,
     });
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -105,6 +109,8 @@ const updateAddress = async (req, res) => {
     phone,
     houseNumber,
     pinCode,
+    email,
+    name,
   } = req.body;
   const { addressId } = req.params;
   const userId = req.user;
@@ -119,6 +125,8 @@ const updateAddress = async (req, res) => {
       phone,
       houseNumber,
       pinCode,
+      email,
+      name,
     });
     !address
       ? res

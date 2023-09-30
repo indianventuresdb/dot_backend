@@ -1,6 +1,7 @@
 const { Products } = require("../models/products");
 
 const calculateAmount = async (products) => {
+  let price = 0;
   let amount = 0;
   const promises = [];
 
@@ -12,14 +13,22 @@ const calculateAmount = async (products) => {
 
   const resolvedProducts = await Promise.all(promises);
 
+  let returnable = true;
+  let cancel = true;
+
   resolvedProducts.forEach((product, index) => {
     const { offeredPrice } = product;
     const { tax } = product;
+    const { isReturnAble } = product;
+    const { isCancelAble } = product;
     const { quantity } = products[index];
+    returnable = returnable && isReturnAble;
+    cancel = cancel && isCancelAble;
+    price = offeredPrice * quantity;
     amount += offeredPrice * (1 + tax / 100) * quantity;
   });
 
-  return amount.toFixed(2);
+  return [amount.toFixed(2), returnable, cancel, price];
 };
 
 module.exports = calculateAmount;

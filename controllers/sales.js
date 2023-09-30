@@ -120,6 +120,7 @@ const monthlySales = async (req, res) => {
   }
 };
 
+
 const getSalesByDateRange = async (req, res) => {
   try {
     const { range } = req.params;
@@ -178,10 +179,13 @@ const getSalesByDateRange = async (req, res) => {
   }
 };
 
+
 module.exports = {
   getSales,
   getCategorywiseSales,
   getCategorywiseSalesInParticularTime,
   monthlySales,
+
   getSalesByDateRange
+
 };
