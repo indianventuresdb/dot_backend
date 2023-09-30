@@ -9,7 +9,12 @@ const sales = new mongoose.Schema({
   sales: {
     type: Number,
     default: 0,
-    require: true,
+    required: true,
+  },
+  gst: {
+    type: Number,
+    default: 0,
+    required: true,
   },
   category: {
     type: Map,

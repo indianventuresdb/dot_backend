@@ -19,13 +19,15 @@ exports.createOrder = async (req, res) => {
 
   let price = 0,
     cost = 0,
+    gst = 0,
     isReturnable = true,
     isCancelable = true;
   try {
     let arr = await calculateAmount(products);
     price = arr[0];
     cost = arr[3];
-    if (cost < 500) price = parseFloat(price) + 60;
+    gst = arr[4];
+    if (price < 3000) price = parseFloat(price) + 150;
     isReturnable = arr[1];
     isCancelable = arr[2];
   } catch (error) {
@@ -33,6 +35,8 @@ exports.createOrder = async (req, res) => {
       .status(404)
       .json({ success: false, message: "Failed to calculate price" });
   }
+
+  console.log(price, cost, gst);
 
   const productsId = products.map((data) => data._id);
   const productCost = products.map((data) => data.price);
@@ -107,12 +111,15 @@ exports.createOrder = async (req, res) => {
     if (!dailySales) {
       await Sales.create({
         dateKey: dailyKey,
-        sales: price,
+        sales: cost,
         category: categoryMap,
+        gst: gst,
       });
     } else {
-      const sales = dailySales.sales + parseFloat(price);
+      const sales = dailySales.sales + parseFloat(cost);
+      const gst = dailySales.gst + parseFloat(gst);
       dailySales.sales = sales;
+      dailySales.gst = gst;
       for (const [categoryName, quantity] of categoryMap.entries()) {
         if (dailySales.category.has(categoryName)) {
           dailySales.category.set(
@@ -142,7 +149,7 @@ exports.createOrder = async (req, res) => {
     );
 
     console.log(order._id);
-    generateInvoice(order._id, address, products, fullOutputPath)
+    generateInvoice(order._id, address, products, fullOutputPath, gst)
       .then(() => {
         console.log("Invoice generated successfully.");
       })

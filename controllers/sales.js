@@ -109,7 +109,7 @@ const monthlySales = async (req, res) => {
     const monthlySales = Array(12).fill(0);
 
     result.forEach((item) => {
-      const month = item._id - 1; 
+      const month = item._id - 1;
       monthlySales[month] = item.totalSales;
     });
 
@@ -120,7 +120,6 @@ const monthlySales = async (req, res) => {
   }
 };
 
-
 const getSalesByDateRange = async (req, res) => {
   try {
     const { range } = req.params;
@@ -128,64 +127,68 @@ const getSalesByDateRange = async (req, res) => {
     let startDate;
 
     switch (range) {
-      case 'last7days':
+      case "today":
+        startDate = new Date(currentDate);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "last7days":
         startDate = new Date(currentDate);
         startDate.setDate(currentDate.getDate() - 7);
         break;
-      case 'last14days':
+      case "last14days":
         startDate = new Date(currentDate);
         startDate.setDate(currentDate.getDate() - 14);
         break;
-      case 'last1month':
+      case "last1month":
         startDate = new Date(currentDate);
         startDate.setMonth(currentDate.getMonth() - 1);
         break;
-      case 'last4months':
+      case "last4months":
         startDate = new Date(currentDate);
         startDate.setMonth(currentDate.getMonth() - 4);
         break;
-      case 'last1year':
-        // Start from April 1st of the previous year
-        startDate = new Date(currentDate.getFullYear() - 1, 3, 1);
+      case "last1year":
+        startDate = new Date(currentDate.getFullYear(), 3, 1);
         break;
       default:
-        res.status(400).json({ message: 'Invalid date range option' });
+        res.status(400).json({ message: "Invalid date range option" });
         return;
     }
 
-    // Perform aggregation to get the sum of total sales for the specified date range
     const result = await Sales.aggregate([
       {
         $match: {
-          dateKey: { $gte: startDate, $lte: currentDate },
+          $expr: {
+            $and: [
+              { $gte: [{ $toDate: "$dateKey" }, startDate] },
+              { $lte: [{ $toDate: "$dateKey" }, currentDate] },
+            ],
+          },
         },
       },
       {
         $group: {
-          _id: null,
+          _id: "s1",
           totalSales: { $sum: "$sales" },
+          totalGst: { $sum: "$gst" },
         },
       },
     ]);
 
-    // Extract the total sales from the result
     const totalSales = result.length > 0 ? result[0].totalSales : 0;
+    const totalGst = result.length > 0 ? result[0].totalGst : 0;
 
-    // Send the total sales as a JSON response
-    res.status(200).json({ totalSales });
+    res.status(200).json({ totalSales, totalGst });
   } catch (error) {
-    console.error(`Error finding sales for the specified date range: ${error}`);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 module.exports = {
   getSales,
   getCategorywiseSales,
   getCategorywiseSalesInParticularTime,
   monthlySales,
-
-  getSalesByDateRange
-
+  getSalesByDateRange,
 };

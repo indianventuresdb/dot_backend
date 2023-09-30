@@ -3,6 +3,7 @@ const { Products } = require("../models/products");
 const calculateAmount = async (products) => {
   let price = 0;
   let amount = 0;
+  let gst = 0;
   const promises = [];
 
   for (const item of products) {
@@ -26,9 +27,10 @@ const calculateAmount = async (products) => {
     cancel = cancel && isCancelAble;
     price = offeredPrice * quantity;
     amount += offeredPrice * (1 + tax / 100) * quantity;
+    gst += ((offeredPrice * tax) / 100) * quantity;
   });
 
-  return [amount.toFixed(2), returnable, cancel, price];
+  return [amount.toFixed(2), returnable, cancel, price, gst];
 };
 
 module.exports = calculateAmount;

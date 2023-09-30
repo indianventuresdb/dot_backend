@@ -2,7 +2,7 @@ const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const generateDailyKey = require("./dailyKey");
 
-function generateInvoice(orderID, address, products, outputPath) {
+function generateInvoice(orderID, address, products, outputPath, gst) {
   let stream;
   try {
     const doc = new PDFDocument({ margin: 10 });
@@ -200,7 +200,7 @@ function generateInvoice(orderID, address, products, outputPath) {
     });
     y += cellHeight;
 
-    const delivery = totalAmount > 499 ? 0 : 60;
+    const delivery = totalAmount > 2999 ? 0 : 150;
     doc.rect(x, y, cellWidth, cellHeight).stroke();
     doc.text(`Courier Charge`, x + 2, y + 10);
     doc.rect(x + cellWidth, y, cellWidth, cellHeight).stroke();
@@ -210,7 +210,6 @@ function generateInvoice(orderID, address, products, outputPath) {
     });
     y += cellHeight;
 
-    const gst = totalAmount * 0.12;
     doc.rect(x, y, cellWidth, cellHeight).stroke();
     doc.text("GST", x + 5, y + 10);
     doc.rect(x + cellWidth, y, cellWidth, cellHeight).stroke();

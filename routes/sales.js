@@ -20,6 +20,6 @@ router.get(
 
 router.get("/monthlySales/:year", monthlySales);
 
-router.get("/:startDate/:endDate/sales", getSalesByDateRange);
+router.get("/sales/:range", getSalesByDateRange);
 
 module.exports = router;
