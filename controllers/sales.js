@@ -94,7 +94,15 @@ const monthlySales = async (req, res) => {
       {
         $match: {
           $expr: {
-            $eq: [{ $year: { $toDate: "$dateKey" } }, year],
+            $and: [
+              { $gte: [{ $toDate: "$dateKey" }, new Date(`${year}-04-01`)] },
+              {
+                $lt: [
+                  { $toDate: "$dateKey" },
+                  new Date(`${parseInt(year) + 1}-04-01`),
+                ],
+              },
+            ],
           },
         },
       },
@@ -109,7 +117,7 @@ const monthlySales = async (req, res) => {
     const monthlySales = Array(12).fill(0);
 
     result.forEach((item) => {
-      const month = item._id - 1;
+      const month = item._id <= 3 ? item._id + 8 : item._id - 4;
       monthlySales[month] = item.totalSales;
     });
 
