@@ -13,6 +13,7 @@ const addressRouter = require("./routes/address.js");
 const sliderRouter = require("./routes/slider.js");
 const salesRouter = require("./routes/sales.js");
 const categoryRouter = require("./routes/category.js");
+const testRouter = require("./routes/testing.js");
 const invoice = require("./routes/Invoices.js");
 const { logger } = require("./middlewares/logger.js");
 const { pathToUrl } = require("./utils/pathToUrl.js");
@@ -60,6 +61,8 @@ app.use("/api/v1/address", addressRouter);
 
 // Use the Shiproket router
 app.use("/api/v1/shiprocket", addressRouter);
+
+app.use("/api/v1/test", testRouter);
 
 // Use the tags router
 app.use("/api/v1/tags", tagsRouter);

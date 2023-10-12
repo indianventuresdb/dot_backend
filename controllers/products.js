@@ -175,7 +175,7 @@ const getProducts = async (req, res) => {
   try {
     const products = await Products.find({});
     !products
-      ? res.status(404).json({ message: "Products not found." })
+      ? res.status(200).json({ products: [] })
       : res.status(200).json(products);
   } catch (error) {
     res.status(404).json({ message: "Products fetching failed." });
@@ -193,7 +193,7 @@ const searchProducts = async (req, res) => {
       ],
     });
     !products
-      ? res.status(300).json({ message: "Product not found" })
+      ? res.status(200).json({ products: [] })
       : res.status(200).json(products);
   } catch (error) {
     return res.status(300).json({ message: "Product not found" });
