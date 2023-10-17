@@ -16,8 +16,14 @@ const CouponCodeSchema = new mongoose.Schema({
     enum: [5, 10],
     default: 5,
   },
+  used: {
+    type: Number,
+    default: 0,
+  },
+  description: {
+    type: String,
+    default: "",
+  },
 });
 
-const CouponCode = mongoose.model("CouponCode", CouponCodeSchema);
-
-module.exports = CouponCode;
+exports.CouponCode = mongoose.model("CouponCode", CouponCodeSchema);
