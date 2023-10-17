@@ -9,6 +9,7 @@ const paymentRouter = require("./routes/payment.js");
 const ordersRouter = require("./routes/orders.js");
 const shipOrdersRouter = require("./routes/shiprocket/orders.js");
 const productsRouter = require("./routes/products.js");
+const rewardsRouter = require("./routes/rewards.js");
 const addressRouter = require("./routes/address.js");
 const sliderRouter = require("./routes/slider.js");
 const salesRouter = require("./routes/sales.js");
@@ -75,6 +76,8 @@ app.use("/api/v1/sales", salesRouter);
 
 // Use the orders router
 app.use("/api/v1/orders", ordersRouter);
+
+app.use("/api/v1/rewards", rewardsRouter);
 
 // Use the products router
 app.use("/api/v1/products", upload.single("image"), productsRouter);

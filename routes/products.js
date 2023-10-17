@@ -1,6 +1,4 @@
 const express = require("express");
-// const { isAuthenticated } = require("../middlewares/auth.js");
-// const { isSeller } = require("../middlewares/isSeller.js");
 const {
   addProducts,
   hideProducts,

@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const uniqid = require("uniqid");
 
 const users = new mongoose.Schema(
   {
@@ -57,6 +56,14 @@ const users = new mongoose.Schema(
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Address",
       default: [],
+    },
+    coupons: {
+      type: [String], 
+      default: [],
+    },
+    referralCode: {
+      type: String,
+      unique: true,
     },
   },
   {
