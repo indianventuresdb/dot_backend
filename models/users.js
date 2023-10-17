@@ -73,8 +73,23 @@ const users = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    usedCoupon: {
+      type: [
+        {
+          couponName: {
+            type: String,
+            required: true,
+          },
+          usageTimestamp: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
+    },
     referredBy: {
       type: String,
+      default: null,
     },
     firstShoppingDone: {
       type: Boolean,

@@ -60,7 +60,7 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
 
 // User Register Controller
 exports.register = async (req, res) => {
-  const { name, email, phone, password } = req.body;
+  const { name, email, phone, password, referral } = req.body;
   const email_OTP = generateOTP();
 
   try {
@@ -69,14 +69,19 @@ exports.register = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
       if (hashedPassword) {
         const otpEmailResult = await sendOTPByEmail(email, email_OTP);
-        console.log(otpEmailResult);
         if (otpEmailResult.success) {
+          let couponCodeArr = [];
+          if (referral) {
+            couponCodeArr = ["WelcomeToAugse5"];
+          }
           const user = await Users.create({
             name,
             email,
             phone,
             phone_OTP: email_OTP.toString(),
             password: hashedPassword,
+            referredBy: referral,
+            activeCouponCode: couponCodeArr,
           });
           if (user) {
             res.status(200).json({
@@ -129,12 +134,8 @@ exports.verify = async (req, res) => {
         .status(300)
         .json({ status: false, message: "Account already verified." });
     }
-    console.log(user.phone_OTP + " " + otp);
     if (user.phone_OTP === otp) {
-      const updated = await Users.findOneAndUpdate(
-        { _id: id },
-        { isPhoneVerified: true }
-      );
+      await Users.findOneAndUpdate({ _id: id }, { isPhoneVerified: true });
       user = await Users.findById(id);
       sendToken(
         user,
