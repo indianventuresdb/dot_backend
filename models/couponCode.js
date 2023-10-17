@@ -6,11 +6,6 @@ const CouponCodeSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
-    required: true,
-  },
   tier: {
     type: String,
     enum: ["Golden", "Silver"],
@@ -20,10 +15,6 @@ const CouponCodeSchema = new mongoose.Schema({
     type: Number,
     enum: [5, 10],
     default: 5,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
   },
 });
 
