@@ -57,13 +57,28 @@ const users = new mongoose.Schema(
       ref: "Address",
       default: [],
     },
-    coupons: {
-      type: [String], 
-      default: [],
-    },
     referralCode: {
       type: String,
       unique: true,
+    },
+    referredUsers: {
+      type: Number,
+      default: 0,
+    },
+    totalCoupon: {
+      type: Number,
+      default: 0,
+    },
+    activeCouponCode: {
+      type: [String],
+      default: [],
+    },
+    referredBy: {
+      type: String,
+    },
+    firstShoppingDone: {
+      type: Boolean,
+      default: false,
     },
   },
   {
