@@ -20,14 +20,18 @@ exports.createOrder = async (req, res) => {
   const paymentMode = req.body.paymentMode;
   const couponCode = req.body.couponCode;
 
-  const verified = await verifyCouponAuthorization(userId, couponCode);
-  if (!verified)
-    return res
-      .status(403)
-      .json({ message: "Not Authorized to use this coupon code" });
-  const coupon = await CouponCode.findOne({ code: couponCode });
-  if (!coupon) return res.status(404).json({ message: "Coupon not found" });
-  const discountPercentage = coupon.discountPercentage;
+  let discountPercentage = 0,
+    coupon = null;
+  if (couponCode) {
+    const verified = await verifyCouponAuthorization(userId, couponCode);
+    if (!verified)
+      return res
+        .status(403)
+        .json({ message: "Not Authorized to use this coupon code" });
+    coupon = await CouponCode.findOne({ code: couponCode });
+    if (!coupon) return res.status(404).json({ message: "Coupon not found" });
+    discountPercentage = coupon.discountPercentage;
+  }
 
   let price = 0,
     cost = 0,
@@ -82,11 +86,14 @@ exports.createOrder = async (req, res) => {
       quantity,
       productName,
       invoiceFileName: "File",
-      price: price - discount,
+      price: price,
       productImage,
       paymentMode,
       isReturnable,
       isCancelable,
+      acutalPrice: cost,
+      gst,
+      discount,
       order_placed: new Date(),
       couponCodeUsed: couponCode,
     });
@@ -107,45 +114,49 @@ exports.createOrder = async (req, res) => {
           `Insufficient stock for product ${product.productName}.`
         );
       }
-      const categoryName = product.category;
-      if (categoryMap.has(categoryName)) {
-        const currentQuantity = categoryMap.get(categoryName);
-        categoryMap.set(categoryName, currentQuantity + productQuantity);
-      } else {
-        categoryMap.set(categoryName, productQuantity);
-      }
 
-      product.quantity = product.quantity - productQuantity;
-      product.sold = product.sold + productQuantity;
-      await product.save();
+      if (paymentMode == "Cash On Delivery") {
+        const categoryName = product.category;
+        if (categoryMap.has(categoryName)) {
+          const currentQuantity = categoryMap.get(categoryName);
+          categoryMap.set(categoryName, currentQuantity + productQuantity);
+        } else {
+          categoryMap.set(categoryName, productQuantity);
+        }
+        product.quantity = product.quantity - productQuantity;
+        product.sold = product.sold + productQuantity;
+        await product.save();
+      }
     }
 
-    const dailyKey = generateDailyKey();
-    const dailySales = await Sales.findOne({ dateKey: dailyKey });
+    if (paymentMode == "Cash On Delivery") {
+      const dailyKey = generateDailyKey();
+      const dailySales = await Sales.findOne({ dateKey: dailyKey });
 
-    if (!dailySales) {
-      await Sales.create({
-        dateKey: dailyKey,
-        sales: cost,
-        category: categoryMap,
-        gst: gst,
-      });
-    } else {
-      const sales = dailySales.sales + parseFloat(cost);
-      const dailygst = dailySales.gst + parseFloat(gst);
-      dailySales.sales = sales;
-      dailySales.gst = dailygst;
-      for (const [categoryName, quantity] of categoryMap.entries()) {
-        if (dailySales.category.has(categoryName)) {
-          dailySales.category.set(
-            categoryName,
-            dailySales.category.get(categoryName) + quantity
-          );
-        } else {
-          dailySales.category.set(categoryName, quantity);
+      if (!dailySales) {
+        await Sales.create({
+          dateKey: dailyKey,
+          sales: cost - discount,
+          category: categoryMap,
+          gst: gst,
+        });
+      } else {
+        const sales = dailySales.sales + parseFloat(cost);
+        const dailygst = dailySales.gst + parseFloat(gst);
+        dailySales.sales = sales;
+        dailySales.gst = dailygst;
+        for (const [categoryName, quantity] of categoryMap.entries()) {
+          if (dailySales.category.has(categoryName)) {
+            dailySales.category.set(
+              categoryName,
+              dailySales.category.get(categoryName) + quantity
+            );
+          } else {
+            dailySales.category.set(categoryName, quantity);
+          }
         }
+        await dailySales.save();
       }
-      await dailySales.save();
     }
 
     const address = await Address.findById(addressId);
@@ -174,11 +185,24 @@ exports.createOrder = async (req, res) => {
 
     order.invoiceFileName = fullOutputPath;
     const savedOrder = await order.save({ session: sess });
+    if (couponCode) {
+      const usedCoupon = {
+        couponName: couponCode,
+        usageTimestamp: new Date().toISOString(),
+      };
+      user.usedCoupon.push(usedCoupon);
+      const couponIndex = user.activeCouponCode.indexOf(couponCode);
+      if (couponIndex !== -1) {
+        user.activeCouponCode.splice(couponIndex, 1);
+      }
+    }
     user.orders.push(order);
     await user.save({ session: sess });
     await sess.commitTransaction();
-    coupon.used = coupon.used + 1;
-    await coupon.save();
+    if (coupon) {
+      coupon.used = coupon.used + 1;
+      await coupon.save();
+    }
     res.status(201).json({ orderId: savedOrder._id });
   } catch (error) {
     console.log(error);

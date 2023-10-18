@@ -1,6 +1,10 @@
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const { Orders } = require("../models/orders.js");
+const { default: mongoose } = require("mongoose");
+const { Products } = require("../models/products.js");
+const generateDailyKey = require("../utils/dailyKey.js");
+const { Sales } = require("../models/sales.js");
 
 var instance = new Razorpay({
   key_id: "rzp_test_ONvCLFgJgnsaYT",
@@ -40,6 +44,7 @@ exports.verifyPayment = async (req, res) => {
 
   const isAuthenticated = expectedSignature === razorpay_signature;
 
+  let sess;
   if (isAuthenticated) {
     try {
       const order = await Orders.findByIdAndUpdate(orderId, {
@@ -52,8 +57,75 @@ exports.verifyPayment = async (req, res) => {
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
+
+      const { quantity, acutalPrice, gst, discount } = order;
+      const productIDs = order.productId,
+        cost = acutalPrice;
+
+      const categoryMap = new Map();
+      sess = await mongoose.startSession();
+      sess.startTransaction();
+
+      for (let i = 0; i < productIDs.length; i++) {
+        const productId = productIDs[i];
+        const productQuantity = quantity[i];
+
+        const product = await Products.findById(productId).session(sess);
+        if (!product) {
+          throw new Error(`Product with ID ${productId} not found.`);
+        }
+
+        if (product.quantity < productQuantity) {
+          throw new Error(
+            `Insufficient stock for product ${product.productName}.`
+          );
+        }
+
+        const categoryName = product.category;
+        if (categoryMap.has(categoryName)) {
+          const currentQuantity = categoryMap.get(categoryName);
+          categoryMap.set(categoryName, currentQuantity + productQuantity);
+        } else {
+          categoryMap.set(categoryName, productQuantity);
+        }
+        product.quantity = product.quantity - productQuantity;
+        product.sold = product.sold + productQuantity;
+        await product.save();
+      }
+
+      const dailyKey = generateDailyKey();
+      const dailySales = await Sales.findOne({ dateKey: dailyKey });
+
+      if (!dailySales) {
+        await Sales.create({
+          dateKey: dailyKey,
+          sales: cost - discount,
+          category: categoryMap,
+          gst: gst,
+        });
+      } else {
+        const sales = dailySales.sales + parseFloat(cost);
+        const dailygst = dailySales.gst + parseFloat(gst);
+        dailySales.sales = sales;
+        dailySales.gst = dailygst;
+        for (const [categoryName, quantity] of categoryMap.entries()) {
+          if (dailySales.category.has(categoryName)) {
+            dailySales.category.set(
+              categoryName,
+              dailySales.category.get(categoryName) + quantity
+            );
+          } else {
+            dailySales.category.set(categoryName, quantity);
+          }
+        }
+        await dailySales.save();
+      }
+
+      await sess.commitTransaction();
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      await sess.abortTransaction();
+      console.log(error);
+      return res.status(500).json({ error: error.message });
     }
 
     res.redirect(process.env.FRONTEND + `/success`);

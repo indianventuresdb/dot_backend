@@ -44,6 +44,18 @@ const orders = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    acutalPrice: {
+      type: Number,
+      required: true,
+    },
+    gst: {
+      type: Number,
+      required: true,
+    },
+    discount: {
+      type: Number,
+      required: true,
+    },
     razorpay_order_id: {
       type: String,
     },
