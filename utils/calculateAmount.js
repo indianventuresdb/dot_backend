@@ -1,9 +1,10 @@
 const { Products } = require("../models/products");
 
-const calculateAmount = async (products) => {
+const calculateAmount = async (products, discountPercentage) => {
   let price = 0;
   let amount = 0;
   let gst = 0;
+  let totalDiscount = 0;
   const promises = [];
 
   for (const item of products) {
@@ -25,12 +26,15 @@ const calculateAmount = async (products) => {
     const { quantity } = products[index];
     returnable = returnable && isReturnAble;
     cancel = cancel && isCancelAble;
-    price = offeredPrice * quantity;
-    amount += offeredPrice * (1 + tax / 100) * quantity;
-    gst += ((offeredPrice * tax) / 100) * quantity;
+    const currentProductPrice = offeredPrice * quantity;
+    price += currentProductPrice;
+    const discount = (currentProductPrice * discountPercentage) / 100;
+    totalDiscount += discount;
+    amount += (currentProductPrice - discount) * (1 + tax / 100);
+    gst += ((currentProductPrice - discount) * tax) / 100;
   });
 
-  return [amount.toFixed(2), returnable, cancel, price, gst];
+  return [amount.toFixed(2), returnable, cancel, price, gst, totalDiscount];
 };
 
 module.exports = calculateAmount;

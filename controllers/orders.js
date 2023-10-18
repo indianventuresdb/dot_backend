@@ -9,6 +9,8 @@ const fs = require("fs");
 const generateInvoice = require("../utils/generateInvoice.js");
 const generateDailyKey = require("../utils/dailyKey.js");
 const calculateAmount = require("../utils/calculateAmount");
+const { verifyCouponAuthorization } = require("../utils/couponAuth.js");
+const { CouponCode } = require("../models/couponCode.js");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
@@ -16,27 +18,40 @@ exports.createOrder = async (req, res) => {
   const userId = req.body.userId;
   const addressId = req.body.addressId;
   const paymentMode = req.body.paymentMode;
+  const couponCode = req.body.couponCode;
+
+  const verified = await verifyCouponAuthorization(userId, couponCode);
+  if (!verified)
+    return res
+      .status(403)
+      .json({ message: "Not Authorized to use this coupon code" });
+  const coupon = await CouponCode.findOne({ code: couponCode });
+  if (!coupon) return res.status(404).json({ message: "Coupon not found" });
+  const discountPercentage = coupon.discountPercentage;
 
   let price = 0,
     cost = 0,
     gst = 0,
+    discount = 0,
     isReturnable = true,
     isCancelable = true;
   try {
-    let arr = await calculateAmount(products);
+    let arr = await calculateAmount(products, discountPercentage);
     price = arr[0];
     cost = arr[3];
     gst = arr[4];
-    if (price < 3000) price = parseFloat(price) + 150;
+    if (cost < 3000) price = parseFloat(price) + 150;
     isReturnable = arr[1];
     isCancelable = arr[2];
+    discount = arr[5];
   } catch (error) {
+    console.log(error);
     return res
       .status(404)
       .json({ success: false, message: "Failed to calculate price" });
   }
 
-  console.log(price, cost, gst);
+  console.log(price, cost, gst, discount);
 
   const productsId = products.map((data) => data._id);
   const productCost = products.map((data) => data.price);
@@ -58,7 +73,6 @@ exports.createOrder = async (req, res) => {
   }
 
   let sess;
-
   try {
     const order = new Orders({
       userId,
@@ -68,12 +82,13 @@ exports.createOrder = async (req, res) => {
       quantity,
       productName,
       invoiceFileName: "File",
-      price,
+      price: price - discount,
       productImage,
       paymentMode,
       isReturnable,
       isCancelable,
       order_placed: new Date(),
+      couponCodeUsed: couponCode,
     });
     sess = await mongoose.startSession();
     sess.startTransaction();
@@ -117,9 +132,9 @@ exports.createOrder = async (req, res) => {
       });
     } else {
       const sales = dailySales.sales + parseFloat(cost);
-      const gst = dailySales.gst + parseFloat(gst);
+      const dailygst = dailySales.gst + parseFloat(gst);
       dailySales.sales = sales;
-      dailySales.gst = gst;
+      dailySales.gst = dailygst;
       for (const [categoryName, quantity] of categoryMap.entries()) {
         if (dailySales.category.has(categoryName)) {
           dailySales.category.set(
@@ -162,7 +177,8 @@ exports.createOrder = async (req, res) => {
     user.orders.push(order);
     await user.save({ session: sess });
     await sess.commitTransaction();
-
+    coupon.used = coupon.used + 1;
+    await coupon.save();
     res.status(201).json({ orderId: savedOrder._id });
   } catch (error) {
     console.log(error);

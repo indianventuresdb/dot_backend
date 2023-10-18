@@ -96,6 +96,10 @@ const orders = new mongoose.Schema(
       type: Boolean,
       required: true,
     },
+    couponCodeUsed: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
