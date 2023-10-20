@@ -17,14 +17,59 @@ exports.checkOut = async (req, res) => {
   try {
     const orderData = await Orders.findById(orderId);
     const amount = orderData.price;
+    // const options = {
+    //   amount: amount * 100,
+    //   currency: "INR",
+    //   receipt: "surendra.singh.kamboj@hotmail.com",
+    // };
     const options = {
-      amount: amount * 100,
-      currency: "INR",
-      receipt: "surendra.singh.kamboj@hotmail.com",
+      merchantId: "PGTESTPAYUAT",
+      merchantTransactionId: "MT7850590068188104",
+      merchantUserId: "MUID123",
+      amount: 1 * 100,
+      redirectUrl: `http://localhost:4001/api/v1/payment/verifyPayment/${orderId}`,
+      redirectMode: "POST",
+      callbackUrl: "https://webhook.site/callback-url",
+      mobileNumber: "9999999999",
+      paymentInstrument: {
+        type: "PAY_PAGE",
+      },
     };
 
-    const order = await instance.orders.create(options);
-    order ? res.status(200).json({ success: true, order }) : null;
+    const saltKey = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399";
+    const jsonString = JSON.stringify(options);
+    const buffer = Buffer.from(jsonString, "utf-8");
+    const base64Encoded = buffer.toString("base64");
+    const apiEndpoint = "/pg/v1/pay";
+    const suffix = "###1";
+
+    const hashInput = base64Encoded + apiEndpoint + saltKey;
+    const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+    const checkSum = hash + suffix;
+
+    const option = {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        "X-VERIFY": checkSum,
+      },
+      body: JSON.stringify({ request: base64Encoded }),
+    };
+
+    const response = await fetch(
+      "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay",
+      option
+    );
+    if (!response.ok) {
+      throw new Error("Error");
+    }
+    const responseData = await response.json();
+    console.log(responseData);
+    res.status(200).json({
+      redirectTo: responseData.data.instrumentResponse.redirectInfo.url,
+      data: responseData,
+    });
   } catch (error) {
     res.redirect(process.env.FRONTEND + `/unsuccess`);
   }
@@ -32,106 +77,108 @@ exports.checkOut = async (req, res) => {
 
 exports.verifyPayment = async (req, res) => {
   const { orderId } = req.params;
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-    req.body;
+  console.log(req.body);
+  res.json({ message: "I an in checkout" });
+  // const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+  //   req.body;
 
-  const body = razorpay_order_id + "|" + razorpay_payment_id;
+  // const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-  const expectedSignature = crypto
-    .createHmac("sha256", "obbG2E3S0JZTAItexNYsJEP6")
-    .update(body.toString())
-    .digest("hex");
+  // const expectedSignature = crypto
+  //   .createHmac("sha256", "obbG2E3S0JZTAItexNYsJEP6")
+  //   .update(body.toString())
+  //   .digest("hex");
 
-  const isAuthenticated = expectedSignature === razorpay_signature;
+  // const isAuthenticated = expectedSignature === razorpay_signature;
 
-  let sess;
-  if (isAuthenticated) {
-    try {
-      const order = await Orders.findByIdAndUpdate(orderId, {
-        razorpay_order_id,
-        razorpay_payment_id,
-        razorpay_signature,
-        payment_successful: true,
-        order_placed: new Date(),
-      });
-      if (!order) {
-        return res.status(404).json({ message: "Order not found" });
-      }
+  // let sess;
+  // if (isAuthenticated) {
+  //   try {
+  //     const order = await Orders.findByIdAndUpdate(orderId, {
+  //       razorpay_order_id,
+  //       razorpay_payment_id,
+  //       razorpay_signature,
+  //       payment_successful: true,
+  //       order_placed: new Date(),
+  //     });
+  //     if (!order) {
+  //       return res.status(404).json({ message: "Order not found" });
+  //     }
 
-      const { quantity, acutalPrice, gst, discount } = order;
-      const productIDs = order.productId,
-        cost = acutalPrice;
+  //     const { quantity, acutalPrice, gst, discount } = order;
+  //     const productIDs = order.productId,
+  //       cost = acutalPrice;
 
-      const categoryMap = new Map();
-      sess = await mongoose.startSession();
-      sess.startTransaction();
+  //     const categoryMap = new Map();
+  //     sess = await mongoose.startSession();
+  //     sess.startTransaction();
 
-      for (let i = 0; i < productIDs.length; i++) {
-        const productId = productIDs[i];
-        const productQuantity = quantity[i];
+  //     for (let i = 0; i < productIDs.length; i++) {
+  //       const productId = productIDs[i];
+  //       const productQuantity = quantity[i];
 
-        const product = await Products.findById(productId).session(sess);
-        if (!product) {
-          throw new Error(`Product with ID ${productId} not found.`);
-        }
+  //       const product = await Products.findById(productId).session(sess);
+  //       if (!product) {
+  //         throw new Error(`Product with ID ${productId} not found.`);
+  //       }
 
-        if (product.quantity < productQuantity) {
-          throw new Error(
-            `Insufficient stock for product ${product.productName}.`
-          );
-        }
+  //       if (product.quantity < productQuantity) {
+  //         throw new Error(
+  //           `Insufficient stock for product ${product.productName}.`
+  //         );
+  //       }
 
-        const categoryName = product.category;
-        if (categoryMap.has(categoryName)) {
-          const currentQuantity = categoryMap.get(categoryName);
-          categoryMap.set(categoryName, currentQuantity + productQuantity);
-        } else {
-          categoryMap.set(categoryName, productQuantity);
-        }
-        product.quantity = product.quantity - productQuantity;
-        product.sold = product.sold + productQuantity;
-        await product.save();
-      }
+  //       const categoryName = product.category;
+  //       if (categoryMap.has(categoryName)) {
+  //         const currentQuantity = categoryMap.get(categoryName);
+  //         categoryMap.set(categoryName, currentQuantity + productQuantity);
+  //       } else {
+  //         categoryMap.set(categoryName, productQuantity);
+  //       }
+  //       product.quantity = product.quantity - productQuantity;
+  //       product.sold = product.sold + productQuantity;
+  //       await product.save();
+  //     }
 
-      const dailyKey = generateDailyKey();
-      const dailySales = await Sales.findOne({ dateKey: dailyKey });
+  //     const dailyKey = generateDailyKey();
+  //     const dailySales = await Sales.findOne({ dateKey: dailyKey });
 
-      if (!dailySales) {
-        await Sales.create({
-          dateKey: dailyKey,
-          sales: cost - discount,
-          category: categoryMap,
-          gst: gst,
-        });
-      } else {
-        const sales = dailySales.sales + parseFloat(cost);
-        const dailygst = dailySales.gst + parseFloat(gst);
-        dailySales.sales = sales;
-        dailySales.gst = dailygst;
-        for (const [categoryName, quantity] of categoryMap.entries()) {
-          if (dailySales.category.has(categoryName)) {
-            dailySales.category.set(
-              categoryName,
-              dailySales.category.get(categoryName) + quantity
-            );
-          } else {
-            dailySales.category.set(categoryName, quantity);
-          }
-        }
-        await dailySales.save();
-      }
+  //     if (!dailySales) {
+  //       await Sales.create({
+  //         dateKey: dailyKey,
+  //         sales: cost - discount,
+  //         category: categoryMap,
+  //         gst: gst,
+  //       });
+  //     } else {
+  //       const sales = dailySales.sales + parseFloat(cost);
+  //       const dailygst = dailySales.gst + parseFloat(gst);
+  //       dailySales.sales = sales;
+  //       dailySales.gst = dailygst;
+  //       for (const [categoryName, quantity] of categoryMap.entries()) {
+  //         if (dailySales.category.has(categoryName)) {
+  //           dailySales.category.set(
+  //             categoryName,
+  //             dailySales.category.get(categoryName) + quantity
+  //           );
+  //         } else {
+  //           dailySales.category.set(categoryName, quantity);
+  //         }
+  //       }
+  //       await dailySales.save();
+  //     }
 
-      await sess.commitTransaction();
-    } catch (error) {
-      await sess.abortTransaction();
-      console.log(error);
-      return res.status(500).json({ error: error.message });
-    }
+  //     await sess.commitTransaction();
+  //   } catch (error) {
+  //     await sess.abortTransaction();
+  //     console.log(error);
+  //     return res.status(500).json({ error: error.message });
+  //   }
 
-    res.redirect(process.env.FRONTEND + `/success`);
-  } else {
-    res.redirect(process.env.FRONTEND + `/unsuccess`);
-  }
+  //   res.redirect(process.env.FRONTEND + `/success`);
+  // } else {
+  //   res.redirect(process.env.FRONTEND + `/unsuccess`);
+  // }
 };
 
 exports.getKey = (req, res) => {
