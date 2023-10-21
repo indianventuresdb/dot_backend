@@ -1,5 +1,6 @@
 const fs = require("fs");
 const { Products } = require("../models/products.js");
+const { generateSlug } = require("../utils/slugGenerator.js");
 
 const addProducts = async (req, res) => {
   const {
@@ -28,6 +29,7 @@ const addProducts = async (req, res) => {
   if (secondImage) images.push(secondImage);
   if (thirdImage) images.push(thirdImage);
   let discount = ((mrp - offeredPrice) / mrp) * 100;
+  const slug = generateSlug(productName);
 
   const tagArray = tags.split(",");
 
@@ -48,6 +50,7 @@ const addProducts = async (req, res) => {
       mrp,
       offeredPrice,
       detailedDescription,
+      slug,
       mainImage,
       otherImages: images,
     });
@@ -205,13 +208,37 @@ const getOneProduct = async (req, res) => {
   const { productId } = req.params;
   try {
     const product = await Products.findById(productId);
-    product.viewCount = product.viewCount + 1;
-    await product.save();
     !product
       ? res.status(404).json({ message: "Product not found erorr 404" })
       : res.status(200).json(product);
   } catch (error) {
     res.status(404).json({ message: "Product not found erorr 404" });
+  }
+};
+
+const getOneProductDetail = async (req, res) => {
+  const { productId } = req.params;
+  try {
+    const product = await Products.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found error 404" });
+    }
+    product.viewCount = product.viewCount + 1;
+    await product.save();
+
+    const sanitizedProduct = {
+      ...product.toObject(),
+      viewCount: undefined,
+      sold: undefined,
+      quantity: undefined,
+      createdAt: undefined,
+      updatedAt: undefined,
+      __v: undefined,
+    };
+
+    res.status(200).json(sanitizedProduct);
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -251,6 +278,7 @@ module.exports = {
   searchProducts,
   deleteImage,
   getOneProduct,
+  getOneProductDetail,
   productNumbers,
   productOfParticularCategory,
 };
