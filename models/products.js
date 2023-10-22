@@ -82,6 +82,9 @@ const products = new mongoose.Schema(
       type: String,
       required: true,
     },
+    slug: {
+      type: String,
+    },
     visibility: {
       type: Boolean,
       default: true,

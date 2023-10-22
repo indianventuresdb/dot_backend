@@ -7,6 +7,7 @@ const {
   getProducts,
   searchProducts,
   getOneProduct,
+  getOneProductDetail,
   addImage,
   deleteImage,
   productNumbers,
@@ -26,6 +27,7 @@ router.post("/deleteimage", deleteImage);
 router.get("/get_all_Products", getProducts);
 router.get("/search/:searchString", searchProducts);
 router.get("/product/:productId", getOneProduct);
+router.get("/productDetail/:productId", getOneProductDetail);
 router.get("/category/:categoryName", productOfParticularCategory);
 router.get("/count", productNumbers);
 

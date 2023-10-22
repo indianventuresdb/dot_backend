@@ -11,17 +11,17 @@ exports.checkOut = async (req, res) => {
   const { orderId } = req.body;
 
   try {
-    const orderData = await Orders.findById(orderId);
+    const orderData = await Orders.findById(orderId).populate("addressId");
     const amount = orderData.price;
     const options = {
       merchantId: data.merchantId,
-      merchantTransactionId: orderId,
+      merchantTransactionId: `AXHD-${orderId}`,
       merchantUserId: orderData.userId,
       amount: amount * 100,
-      redirectUrl: `${process.env.BACKEND}/api/v1/payment/verifyPayment`,
+      redirectUrl: `${process.env.BACKEND}/api/v1/payment/verifyPayment/${orderId}`,
       redirectMode: "POST",
-      callbackUrl: `${process.env.BACKEND}/api/v1/payment/verifyPayment`,
-      mobileNumber: "9999999999",
+      callbackUrl: `${process.env.BACKEND}/api/v1/payment/verifyPayment/${orderId}`,
+      mobileNumber: orderData.addressId.phone,
       paymentInstrument: {
         type: "PAY_PAGE",
       },
@@ -65,8 +65,8 @@ exports.checkOut = async (req, res) => {
 };
 
 exports.verifyPayment = async (req, res) => {
+  const { orderId } = req.params;
   const { code, transactionId } = req.body;
-  const orderId = transactionId;
 
   let sess;
   if (code === "PAYMENT_SUCCESS") {
