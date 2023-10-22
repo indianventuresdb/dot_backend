@@ -5,11 +5,9 @@ const { default: mongoose } = require("mongoose");
 const { Products } = require("../models/products.js");
 const generateDailyKey = require("../utils/dailyKey.js");
 const { Sales } = require("../models/sales.js");
+const credentials = require("../config/razorpay.js");
 
-var instance = new Razorpay({
-  key_id: "rzp_test_ONvCLFgJgnsaYT",
-  key_secret: "obbG2E3S0JZTAItexNYsJEP6",
-});
+var instance = new Razorpay(credentials);
 
 exports.checkOut = async (req, res) => {
   const { orderId } = req.body;
@@ -20,7 +18,7 @@ exports.checkOut = async (req, res) => {
     const options = {
       amount: amount * 100,
       currency: "INR",
-      receipt: "surendra.singh.kamboj@hotmail.com",
+      receipt: "user@email.com",
     };
 
     const order = await instance.orders.create(options);
@@ -38,7 +36,7 @@ exports.verifyPayment = async (req, res) => {
   const body = razorpay_order_id + "|" + razorpay_payment_id;
 
   const expectedSignature = crypto
-    .createHmac("sha256", "obbG2E3S0JZTAItexNYsJEP6")
+    .createHmac("sha256", credentials.key_secret)
     .update(body.toString())
     .digest("hex");
 
@@ -135,5 +133,5 @@ exports.verifyPayment = async (req, res) => {
 };
 
 exports.getKey = (req, res) => {
-  return res.status(200).json({ key: "rzp_test_ONvCLFgJgnsaYT" });
+  return res.status(200).json({ key: credentials.key });
 };
