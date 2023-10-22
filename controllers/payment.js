@@ -6,6 +6,9 @@ const { Products } = require("../models/products.js");
 const generateDailyKey = require("../utils/dailyKey.js");
 const { Sales } = require("../models/sales.js");
 const data = require("../config/phonepay.js");
+const nodemailer = require("nodemailer");
+const fs = require("fs");
+const path = require("path");
 
 exports.checkOut = async (req, res) => {
   const { orderId } = req.body;
@@ -79,7 +82,7 @@ exports.verifyPayment = async (req, res) => {
         return res.status(404).json({ message: "Order not found" });
       }
 
-      const { quantity, acutalPrice, gst, discount } = order;
+      const { quantity, acutalPrice, gst, discount, invoiceFileName } = order;
       const productIDs = order.productId,
         cost = acutalPrice;
 
@@ -143,6 +146,44 @@ exports.verifyPayment = async (req, res) => {
       }
 
       await sess.commitTransaction();
+
+      const orderDetail = await Orders.findById(orderId).populate("addressId");
+      const transporter = nodemailer.createTransport({
+        service: "Gmail",
+        auth: {
+          user: process.env.USER_E_MAIL,
+          pass: process.env.USER_PASS,
+        },
+      });
+
+      const filePath = path.join(__dirname, "../", invoiceFileName);
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          return res.status(500).json({ message: "Error reading file" });
+        }
+
+        const mailOptions = {
+          from: "no-reply@gmail.com",
+          to: orderDetail.addressId.email,
+          subject: "Invoice",
+          text: "Thank You for Shopping with Augse. Your Order is placed successfully & will be delivered to you within 5 to 8 working days. To track your order status. click here: https://www.augse.in/users/Orders",
+          attachments: [
+            {
+              filename: invoiceFileName,
+              content: data,
+              encoding: "base64",
+            },
+          ],
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.error("Error sending email:", error);
+          } else {
+            console.log("Email sent:", info.response);
+          }
+        });
+      });
     } catch (error) {
       await sess.abortTransaction();
       console.log(error);
