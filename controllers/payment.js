@@ -5,24 +5,60 @@ const { default: mongoose } = require("mongoose");
 const { Products } = require("../models/products.js");
 const generateDailyKey = require("../utils/dailyKey.js");
 const { Sales } = require("../models/sales.js");
-const credentials = require("../config/razorpay.js");
-
-var instance = new Razorpay(credentials);
+const data = require("../config/phonepay.js");
 
 exports.checkOut = async (req, res) => {
   const { orderId } = req.body;
 
   try {
-    const orderData = await Orders.findById(orderId);
+    const orderData = await Orders.findById(orderId).populate("addressId");
     const amount = orderData.price;
     const options = {
+      merchantId: data.merchantId,
+      merchantTransactionId: `AXHD-${orderId}`,
+      merchantUserId: orderData.userId,
       amount: amount * 100,
-      currency: "INR",
-      receipt: "user@email.com",
+      redirectUrl: `${process.env.BACKEND}/api/v1/payment/verifyPayment/${orderId}`,
+      redirectMode: "POST",
+      callbackUrl: `${process.env.BACKEND}/api/v1/payment/verifyPayment/${orderId}`,
+      mobileNumber: orderData.addressId.phone,
+      paymentInstrument: {
+        type: "PAY_PAGE",
+      },
     };
 
-    const order = await instance.orders.create(options);
-    order ? res.status(200).json({ success: true, order }) : null;
+    const saltKey = data.salt;
+    const jsonString = JSON.stringify(options);
+    const buffer = Buffer.from(jsonString, "utf-8");
+    const base64Encoded = buffer.toString("base64");
+    const apiEndpoint = "/pg/v1/pay";
+    const suffix = "###1";
+
+    const hashInput = base64Encoded + apiEndpoint + saltKey;
+    const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+    const checkSum = hash + suffix;
+
+    const option = {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        "X-VERIFY": checkSum,
+      },
+      body: JSON.stringify({ request: base64Encoded }),
+    };
+
+    const response = await fetch(
+      "https://api.phonepe.com/apis/hermes/pg/v1/pay",
+      option
+    );
+    if (!response.ok) {
+      throw new Error("Error");
+    }
+    const responseData = await response.json();
+    res.status(200).json({
+      redirectTo: responseData.data.instrumentResponse.redirectInfo.url,
+    });
   } catch (error) {
     res.redirect(process.env.FRONTEND + `/unsuccess`);
   }
@@ -30,25 +66,12 @@ exports.checkOut = async (req, res) => {
 
 exports.verifyPayment = async (req, res) => {
   const { orderId } = req.params;
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-    req.body;
-
-  const body = razorpay_order_id + "|" + razorpay_payment_id;
-
-  const expectedSignature = crypto
-    .createHmac("sha256", credentials.key_secret)
-    .update(body.toString())
-    .digest("hex");
-
-  const isAuthenticated = expectedSignature === razorpay_signature;
+  const { code, transactionId } = req.body;
 
   let sess;
-  if (isAuthenticated) {
+  if (code === "PAYMENT_SUCCESS") {
     try {
       const order = await Orders.findByIdAndUpdate(orderId, {
-        razorpay_order_id,
-        razorpay_payment_id,
-        razorpay_signature,
         payment_successful: true,
         order_placed: new Date(),
       });
@@ -133,5 +156,5 @@ exports.verifyPayment = async (req, res) => {
 };
 
 exports.getKey = (req, res) => {
-  return res.status(200).json({ key: credentials.key });
+  return res.status(200).json({ key: "rzp_test_ONvCLFgJgnsaYT" });
 };
