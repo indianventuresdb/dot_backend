@@ -147,7 +147,9 @@ exports.verifyPayment = async (req, res) => {
 
       await sess.commitTransaction();
 
-      const orderDetail = await Orders.findById(orderId).populate("addressId");
+      const orderDetail = await Orders.findById(orderId)
+        .populate("addressId")
+        .populate("userId");
       const transporter = nodemailer.createTransport({
         service: "Gmail",
         auth: {
@@ -163,7 +165,7 @@ exports.verifyPayment = async (req, res) => {
         }
 
         const mailOptions = {
-          from: "no-reply@gmail.com",
+          from: process.env.USER_E_MAIL,
           to: orderDetail.addressId.email,
           subject: "Invoice",
           text: "Thank You for Shopping with Augse. Your Order is placed successfully & will be delivered to you within 5 to 8 working days. To track your order status. click here: https://www.augse.in/users/Orders",
@@ -177,6 +179,35 @@ exports.verifyPayment = async (req, res) => {
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.error("Error sending email:", error);
+          } else {
+            console.log("Email sent:", info.response);
+          }
+        });
+
+        const mailOptions2 = {
+          from: process.env.USER_E_MAIL,
+          to: process.env.SELLER_MAIL,
+          subject: `New Order Received - ${orderId}`,
+          text: `Dear Augse,
+
+          We're excited to inform you that a new order has been received from a customer on your website. Here are the details:
+          
+          Customer Name: ${orderDetail.userId.name}
+          Phone Number: ${orderDetail.userId.phone}
+          Email Address: ${orderDetail.userId.email}
+          Order Number: ${orderId}
+          Order Detail: https://admin.augse.in/admin/track/${orderId}
+          Please take the necessary steps to process this order promptly. If you require any additional information, feel free to contact the customer using the provided details.
+          
+          Thank you for your attention to this matter.
+          
+          Best regards,
+          Augse Webserver`,
+        };
+
+        transporter.sendMail(mailOptions2, (error, info) => {
           if (error) {
             console.error("Error sending email:", error);
           } else {
