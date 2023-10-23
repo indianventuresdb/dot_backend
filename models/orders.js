@@ -56,13 +56,10 @@ const orders = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    razorpay_order_id: {
+    transactionId: {
       type: String,
     },
-    razorpay_payment_id: {
-      type: String,
-    },
-    razorpay_signature: {
+    providerReferenceId: {
       type: String,
     },
     payment_successful: {

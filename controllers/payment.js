@@ -30,6 +30,10 @@ exports.checkOut = async (req, res) => {
       },
     };
 
+    await Orders.findByIdAndUpdate(orderId, {
+      transactionId: `AXHD-${orderId}`,
+    });
+
     const saltKey = data.salt;
     const jsonString = JSON.stringify(options);
     const buffer = Buffer.from(jsonString, "utf-8");
@@ -69,18 +73,25 @@ exports.checkOut = async (req, res) => {
 
 exports.verifyPayment = async (req, res) => {
   const { orderId } = req.params;
-  const { code, transactionId } = req.body;
+  const { code, transactionId, providerReferenceId } = req.body;
 
   let sess;
   if (code === "PAYMENT_SUCCESS") {
     try {
-      const order = await Orders.findByIdAndUpdate(orderId, {
-        payment_successful: true,
-        order_placed: new Date(),
-      });
+      const order = await Orders.findById(orderId);
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
+
+      if (order.transactionId != transactionId) {
+        return res.status(404).json({ message: "Unauthorized" });
+      }
+
+      order.providerReferenceId = providerReferenceId;
+      order.payment_successful = true;
+      order.order_placed = new Date();
+
+      await order.save();
 
       const { quantity, acutalPrice, gst, discount, invoiceFileName } = order;
       const productIDs = order.productId,
@@ -193,16 +204,16 @@ exports.verifyPayment = async (req, res) => {
           text: `Dear Augse,
 
           We're excited to inform you that a new order has been received from a customer on your website. Here are the details:
-          
+
           Customer Name: ${orderDetail.userId.name}
           Phone Number: ${orderDetail.userId.phone}
           Email Address: ${orderDetail.userId.email}
           Order Number: ${orderId}
           Order Detail: https://admin.augse.in/admin/track/${orderId}
           Please take the necessary steps to process this order promptly. If you require any additional information, feel free to contact the customer using the provided details.
-          
+
           Thank you for your attention to this matter.
-          
+
           Best regards,
           Augse Webserver`,
         };
