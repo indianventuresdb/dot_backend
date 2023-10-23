@@ -20,7 +20,7 @@ exports.checkOut = async (req, res) => {
       merchantId: data.merchantId,
       merchantTransactionId: `AXHD-${orderId}`,
       merchantUserId: orderData.userId,
-      amount: amount * 100,
+      amount: 1 * 100,
       redirectUrl: `${process.env.BACKEND}/api/v1/payment/verifyPayment/${orderId}`,
       redirectMode: "POST",
       callbackUrl: `${process.env.BACKEND}/api/v1/payment/verifyPayment/${orderId}`,
