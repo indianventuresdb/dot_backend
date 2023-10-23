@@ -209,6 +209,7 @@ exports.verifyPayment = async (req, res) => {
           Phone Number: ${orderDetail.userId.phone}
           Email Address: ${orderDetail.userId.email}
           Order Number: ${orderId}
+          Order Date: ${new Date()}
           Order Detail: https://admin.augse.in/admin/track/${orderId}
           Please take the necessary steps to process this order promptly. If you require any additional information, feel free to contact the customer using the provided details.
 
