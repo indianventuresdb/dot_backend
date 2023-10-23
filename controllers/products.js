@@ -253,6 +253,17 @@ const productNumbers = async (req, res) => {
   }
 };
 
+const productQuantity = async (req, res) => {
+  const productId = req.params.productId;
+  try {
+    const product = await Products.findById(productId);
+    if (!product) return res.status(404).json({ message: "Product Not Found" });
+    res.status(200).json({ quantity: product.quantity });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 const productOfParticularCategory = async (req, res) => {
   const { categoryName } = req.params;
   try {
@@ -281,4 +292,5 @@ module.exports = {
   getOneProductDetail,
   productNumbers,
   productOfParticularCategory,
+  productQuantity,
 };

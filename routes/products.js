@@ -10,6 +10,7 @@ const {
   getOneProductDetail,
   addImage,
   deleteImage,
+  productQuantity,
   productNumbers,
   productOfParticularCategory,
 } = require("../controllers/products.js");
@@ -27,6 +28,7 @@ router.post("/deleteimage", deleteImage);
 router.get("/get_all_Products", getProducts);
 router.get("/search/:searchString", searchProducts);
 router.get("/product/:productId", getOneProduct);
+router.get("/product/quantity/:productId", productQuantity);
 router.get("/productDetail/:productId", getOneProductDetail);
 router.get("/category/:categoryName", productOfParticularCategory);
 router.get("/count", productNumbers);
