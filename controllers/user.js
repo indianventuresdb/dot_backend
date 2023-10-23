@@ -14,7 +14,7 @@ const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
     );
 
     // Set the JWT token as a cookie
-    res.cookie("token", token, {
+    res.cookie("token", btoa(token), {
       httpOnly: true, // Cookie can only be accessed by the server, not JavaScript in the browser
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
       secure: process.env.NODE_ENV === "production", // Set to true in production for HTTPS
