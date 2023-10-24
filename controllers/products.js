@@ -141,7 +141,7 @@ const updateProducts = async (req, res) => {
   if (secondImage) images.push(secondImage);
   if (thirdImage) images.push(thirdImage);
   let discount = ((mrp - offeredPrice) / mrp) * 100;
-
+  const slug = generateSlug(productName);
   const tagArray = tags.split(",");
 
   try {
@@ -160,6 +160,7 @@ const updateProducts = async (req, res) => {
       isCancelAble,
       mrp,
       offeredPrice,
+      slug,
       detailedDescription,
       mainImage,
       otherImages: images,

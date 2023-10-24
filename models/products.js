@@ -84,6 +84,7 @@ const products = new mongoose.Schema(
     },
     slug: {
       type: String,
+      required: true,
     },
     visibility: {
       type: Boolean,
