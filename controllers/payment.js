@@ -9,6 +9,7 @@ const data = require("../config/phonepay.js");
 const nodemailer = require("nodemailer");
 const fs = require("fs");
 const path = require("path");
+const { generateUniqueString } = require("../utils/generateTransactionId.js");
 
 exports.checkOut = async (req, res) => {
   const { orderId } = req.body;
@@ -16,9 +17,10 @@ exports.checkOut = async (req, res) => {
   try {
     const orderData = await Orders.findById(orderId).populate("addressId");
     const amount = orderData.price;
+    const transactionId = generateUniqueString();
     const options = {
       merchantId: data.merchantId,
-      merchantTransactionId: `${orderId}${new Date().getTime()}`,
+      merchantTransactionId: transactionId,
       merchantUserId: orderData.userId,
       amount: amount * 100,
       redirectUrl: `${process.env.BACKEND}/api/v1/payment/verifyPayment/${orderId}`,
@@ -31,7 +33,7 @@ exports.checkOut = async (req, res) => {
     };
 
     await Orders.findByIdAndUpdate(orderId, {
-      transactionId: `${orderId}${new Date().getTime()}}`,
+      transactionId: transactionId,
     });
 
     const saltKey = data.salt;
