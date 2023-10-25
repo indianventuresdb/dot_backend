@@ -67,7 +67,7 @@ exports.checkOut = async (req, res) => {
       redirectTo: responseData.data.instrumentResponse.redirectInfo.url,
     });
   } catch (error) {
-    res.redirect(process.env.FRONTEND + `/unsuccess`);
+    res.redirect(process.env.FRONTEND + `/unsuccess?orderId=${orderId}`);
   }
 };
 
@@ -233,9 +233,11 @@ exports.verifyPayment = async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
 
-    res.redirect(process.env.FRONTEND + `/success`);
+    res.redirect(
+      process.env.FRONTEND + `/success?tranactionId=${transactionId}`
+    );
   } else {
-    res.redirect(process.env.FRONTEND + `/unsuccess`);
+    res.redirect(process.env.FRONTEND + `/unsuccess?orderId=${orderId}`);
   }
 };
 
