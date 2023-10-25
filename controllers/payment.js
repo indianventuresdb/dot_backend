@@ -18,7 +18,7 @@ exports.checkOut = async (req, res) => {
     const amount = orderData.price;
     const options = {
       merchantId: data.merchantId,
-      merchantTransactionId: `AXHD-${orderId}`,
+      merchantTransactionId: `${orderId}${new Date().getTime()}`,
       merchantUserId: orderData.userId,
       amount: amount * 100,
       redirectUrl: `${process.env.BACKEND}/api/v1/payment/verifyPayment/${orderId}`,
@@ -31,7 +31,7 @@ exports.checkOut = async (req, res) => {
     };
 
     await Orders.findByIdAndUpdate(orderId, {
-      transactionId: `AXHD-${orderId}`,
+      transactionId: `${orderId}${new Date().getTime()}}`,
     });
 
     const saltKey = data.salt;
@@ -60,7 +60,8 @@ exports.checkOut = async (req, res) => {
       option
     );
     if (!response.ok) {
-      throw new Error("Error");
+      const errorMessage = await response.text();
+      throw new Error(errorMessage);
     }
     const responseData = await response.json();
     res.status(200).json({

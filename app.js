@@ -49,7 +49,16 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type. Only JPEG, PNG files are allowed."));
+  }
+};
+
+const upload = multer({ storage, fileFilter });
 
 // Use the user router
 app.use("/api/v1/indentifier", who_i_am);
