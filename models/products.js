@@ -60,6 +60,9 @@ const products = new mongoose.Schema(
       type: Boolean,
       required: true,
     },
+    hsn: {
+      type: String,
+    },
     mrp: {
       type: Number,
       required: true,

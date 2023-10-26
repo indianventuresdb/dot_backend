@@ -326,3 +326,20 @@ exports.ordersNumbers = async (req, res) => {
     res.status(300).json({ message: "fail to count orders" });
   }
 };
+
+exports.getPendingOrders = async (req,res) => {
+  try {
+    const currentDate = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(currentDate.getDate() - 30);
+    const pendingOrders = await Orders.find({
+      $or: [
+        { delivered: { $exists: false } },
+        { delivered: { $lt: thirtyDaysAgo } },
+      ],
+    });
+    return res.status(200).json(pendingOrders);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
