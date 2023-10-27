@@ -349,6 +349,7 @@ exports.orderReadyToDispatch = async (req, res) => {
   try {
     const order = await Orders.findByIdAndUpdate(orderId, {
       status: "Ready To Dispatch",
+      packed: new Date(),
     });
     if (!order) {
       return res.status(404).json({ message: "Order Not Found" });
@@ -361,9 +362,13 @@ exports.orderReadyToDispatch = async (req, res) => {
 
 exports.orderDispatched = async (req, res) => {
   const { orderId } = req.params;
+  const { awb } = req.body;
+
   try {
     const order = await Orders.findByIdAndUpdate(orderId, {
       status: "Dispatched",
+      shipped: new Date(),
+      awb: awb,
     });
     if (!order) {
       return res.status(404).json({ message: "Order Not Found" });
@@ -379,6 +384,7 @@ exports.orderDelivered = async (req, res) => {
   try {
     const order = await Orders.findByIdAndUpdate(orderId, {
       status: "Delivered",
+      delivered: new Date(),
     });
     if (!order) {
       return res.status(404).json({ message: "Order Not Found" });

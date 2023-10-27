@@ -84,7 +84,6 @@ const orders = new mongoose.Schema(
     },
     awb: {
       type: String,
-      default: "",
     },
     wayBill: {
       type: String,
