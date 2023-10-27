@@ -327,7 +327,7 @@ exports.ordersNumbers = async (req, res) => {
   }
 };
 
-exports.getPendingOrders = async (req,res) => {
+exports.getPendingOrders = async (req, res) => {
   try {
     const currentDate = new Date();
     const thirtyDaysAgo = new Date();
@@ -337,9 +337,54 @@ exports.getPendingOrders = async (req,res) => {
         { delivered: { $exists: false } },
         { delivered: { $lt: thirtyDaysAgo } },
       ],
-    });
+    }).populate("userId");
     return res.status(200).json(pendingOrders);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+exports.orderReadyToDispatch = async (req, res) => {
+  const { orderId } = req.params;
+  try {
+    const order = await Orders.findByIdAndUpdate(orderId, {
+      status: "Ready To Dispatch",
+    });
+    if (!order) {
+      return res.status(404).json({ message: "Order Not Found" });
+    }
+    res.status(201).json({ message: "Order Ready To Dispatch" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.orderDispatched = async (req, res) => {
+  const { orderId } = req.params;
+  try {
+    const order = await Orders.findByIdAndUpdate(orderId, {
+      status: "Dispatched",
+    });
+    if (!order) {
+      return res.status(404).json({ message: "Order Not Found" });
+    }
+    res.status(201).json({ message: "Order Dispatched" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.orderDelivered = async (req, res) => {
+  const { orderId } = req.params;
+  try {
+    const order = await Orders.findByIdAndUpdate(orderId, {
+      status: "Delivered",
+    });
+    if (!order) {
+      return res.status(404).json({ message: "Order Not Found" });
+    }
+    res.status(201).json({ message: "Order Delivered" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
