@@ -52,7 +52,11 @@ const addAddress = async (req, res) => {
     !newAddress
       ? res
           .status(301)
-          .json({ success: false, message: "Address could not saved." })
+          .json({
+            success: false,
+            message: "Address could not saved.",
+            address: newAddress,
+          })
       : res
           .status(201)
           .json({ success: true, message: "Address Added successful." });
