@@ -50,15 +50,17 @@ const addAddress = async (req, res) => {
     await user.save({ session: sess });
     await sess.commitTransaction();
     !newAddress
-      ? res
-          .status(301)
-          .json({
-            success: false,
-            message: "Address could not saved."
-          })
+      ? res.status(301).json({
+          success: false,
+          message: "Address could not saved.",
+        })
       : res
           .status(201)
-          .json({ success: true, message: "Address Added successful.",address: newAddress });
+          .json({
+            success: true,
+            message: "Address Added successful.",
+            address: newAddress,
+          });
   } catch (error) {
     console.error(error);
     return res
