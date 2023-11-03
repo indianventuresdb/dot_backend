@@ -69,7 +69,7 @@ exports.createOrder = async (req, res) => {
 
   console.log(price, cost, gst, discount);
   try {
-    if (!coupon && coupondiscount != 0) {
+    if (!coupon && discount != 0) {
       const specialCoupon = await SpecialCouponCode.findOne({
         code: couponCode,
       });
@@ -82,13 +82,14 @@ exports.createOrder = async (req, res) => {
       } else {
         return res
           .status(404)
-          .json({ success: false, message: "Price less than expected" });
+          .json({
+            success: false,
+            message: `Price less than expected ${price}`,
+          });
       }
     }
   } catch (error) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Price less than expected" });
+    return res.status(404).json({ success: false, message: "Server Error" });
   }
 
   const productsId = products.map((data) => data._id);
