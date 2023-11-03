@@ -7,6 +7,7 @@ const {
   activeCodes,
   getDiscountPercentageFromCode,
   addCoupon,
+  addSpecialCoupon,
 } = require("./../controllers/rewards");
 
 router.get("/referral_link/me", myReferralLink);
@@ -18,5 +19,7 @@ router.get("/activeCodes/:userId", activeCodes);
 router.get("/getDiscountPercentage", getDiscountPercentageFromCode);
 
 router.post("/add/coupon", addCoupon);
+
+router.post("/add/coupon/special", addSpecialCoupon);
 
 module.exports = router;

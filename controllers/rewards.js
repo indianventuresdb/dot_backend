@@ -1,7 +1,11 @@
 const { Users } = require("./../models/users");
 const { CouponCode } = require("./../models/couponCode");
+const { SpecialCouponCode } = require("./../models/specialCouponCode");
 const { encryptReferralCode } = require("./../utils/referralcode");
 const { verifyCouponAuthorization } = require("./../utils/couponAuth");
+const {
+  verifySpecialCouponAuthorization,
+} = require("../utils/verifySpecialCouponAuthorization");
 
 const myReferralLink = async (req, res) => {
   const userId = req.query.userId;
@@ -61,10 +65,20 @@ const getDiscountPercentageFromCode = async (req, res) => {
         res.status(404).json({ message: "Coupon not found" });
       }
     } else {
+      const verifySpecial = await verifySpecialCouponAuthorization(
+        userId,
+        code
+      );
+      if (verifySpecial) {
+        return res.status(200).json({
+          message: "Verified",
+          coupon: code,
+          discountPercentage: verifySpecial,
+        });
+      }
       res.status(403).json({ message: "Not Authorized to use this code" });
     }
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -92,10 +106,44 @@ const addCoupon = async (req, res) => {
   }
 };
 
+const addSpecialCoupon = async (req, res) => {
+  try {
+    const {
+      code,
+      discountPercentage,
+      description,
+      expiryDate,
+      minPrice,
+      otherValidations,
+      validationRules,
+    } = req.body;
+
+    const adjustedExpiryDate = new Date(expiryDate);
+    adjustedExpiryDate.setHours(23, 59, 59, 999);
+
+    const newCoupon = new SpecialCouponCode({
+      code,
+      discountPercentage,
+      description,
+      expiryDate: adjustedExpiryDate,
+      minPrice,
+      otherValidations,
+      validationRules,
+    });
+
+    const savedCoupon = await newCoupon.save();
+
+    res.status(201).json(savedCoupon);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   myReferralLink,
   usedCodes,
   activeCodes,
   getDiscountPercentageFromCode,
   addCoupon,
+  addSpecialCoupon,
 };

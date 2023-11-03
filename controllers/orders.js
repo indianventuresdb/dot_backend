@@ -11,6 +11,10 @@ const generateDailyKey = require("../utils/dailyKey.js");
 const calculateAmount = require("../utils/calculateAmount");
 const { verifyCouponAuthorization } = require("../utils/couponAuth.js");
 const { CouponCode } = require("../models/couponCode.js");
+const {
+  verifySpecialCouponAuthorization,
+} = require("../utils/verifySpecialCouponAuthorization.js");
+const { SpecialCouponCode } = require("../models/specialCouponCode.js");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
@@ -24,13 +28,21 @@ exports.createOrder = async (req, res) => {
     coupon = null;
   if (couponCode) {
     const verified = await verifyCouponAuthorization(userId, couponCode);
-    if (!verified)
-      return res
-        .status(403)
-        .json({ message: "Not Authorized to use this coupon code" });
-    coupon = await CouponCode.findOne({ code: couponCode });
-    if (!coupon) return res.status(404).json({ message: "Coupon not found" });
-    discountPercentage = coupon.discountPercentage;
+    if (!verified) {
+      const verifySpecial = await verifySpecialCouponAuthorization(
+        userId,
+        couponCode
+      );
+      if (verifySpecial) discountPercentage = verifySpecial;
+      else
+        return res
+          .status(403)
+          .json({ message: "Not Authorized to use this coupon code" });
+    } else {
+      coupon = await CouponCode.findOne({ code: couponCode });
+      if (!coupon) return res.status(404).json({ message: "Coupon not found" });
+      discountPercentage = coupon.discountPercentage;
+    }
   }
 
   let price = 0,
@@ -56,6 +68,28 @@ exports.createOrder = async (req, res) => {
   }
 
   console.log(price, cost, gst, discount);
+  try {
+    if (!coupon && coupondiscount != 0) {
+      const specialCoupon = await SpecialCouponCode.findOne({
+        code: couponCode,
+      });
+      if (specialCoupon && price >= specialCoupon.minPrice) {
+        specialCoupon.used.push(userId);
+        await specialCoupon.save();
+        return res
+          .status(200)
+          .json({ success: true, message: "Coupon applied successfully" });
+      } else {
+        return res
+          .status(404)
+          .json({ success: false, message: "Price less than expected" });
+      }
+    }
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ success: false, message: "Price less than expected" });
+  }
 
   const productsId = products.map((data) => data._id);
   const productCost = products.map((data) => data.price);

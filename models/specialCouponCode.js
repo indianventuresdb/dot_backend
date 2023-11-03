@@ -6,17 +6,14 @@ const SpecialCouponCodeSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  name: {
-    type: String,
-    required: true,
-  },
   discountPercentage: {
     type: Number,
     default: 5,
   },
   used: {
-    type: Number,
-    default: 0,
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Users",
+    default: [],
   },
   description: {
     type: String,
@@ -36,7 +33,7 @@ const SpecialCouponCodeSchema = new mongoose.Schema({
   },
 });
 
-exports.CouponCode = mongoose.model(
+exports.SpecialCouponCode = mongoose.model(
   "SpecialCouponCode",
   SpecialCouponCodeSchema
 );
