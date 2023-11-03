@@ -76,16 +76,11 @@ exports.createOrder = async (req, res) => {
       if (specialCoupon && price >= specialCoupon.minPrice) {
         specialCoupon.used.push(userId);
         await specialCoupon.save();
-        return res
-          .status(200)
-          .json({ success: true, message: "Coupon applied successfully" });
       } else {
-        return res
-          .status(404)
-          .json({
-            success: false,
-            message: `Price less than expected ${price}`,
-          });
+        return res.status(404).json({
+          success: false,
+          message: `Price less than expected ${price}`,
+        });
       }
     }
   } catch (error) {
