@@ -10,6 +10,7 @@ const {
   deleteUser,
   usersNumbers,
   userProfile,
+  customerLogin,
   verifyUser,
   resetPasswordOtp,
   resetPassword,
@@ -26,6 +27,8 @@ const router = express.Router();
 router.post("/register", register);
 
 router.post("/login", login);
+
+router.post("/customer/login", customerLogin);
 
 router.post("/login_admin", loginAdmin);
 

@@ -118,6 +118,44 @@ exports.register = async (req, res) => {
   }
 };
 
+exports.customerLogin = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const email_OTP = generateOTP();
+    let user = await Users.findOne({ email });
+    if (!user) {
+      user = await Users.create({
+        email,
+        phone_OTP: email_OTP.toString(),
+        isPhoneVerified: true,
+      });
+    } else {
+      user.phone_OTP = email_OTP.toString();
+      await user.save();
+    }
+    if (!user) {
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+    const otpEmailResult = await sendOTPByEmail(email, email_OTP);
+    if (otpEmailResult.success) {
+      res.status(200).json({
+        status: false,
+        id: user._id,
+        message:
+          "Your account is not verified. Please check your email and verify your account.",
+      });
+    } else {
+      res.status(500).json({
+        status: false,
+        message: "Failed to send OTP via email.",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 // User account verify Controller
 exports.verify = async (req, res) => {
   const { id, otp } = req.params;
@@ -129,11 +167,11 @@ exports.verify = async (req, res) => {
         .status(300)
         .json({ status: false, message: "Account not Registered." });
     }
-    if (user.isPhoneVerified) {
-      return res
-        .status(300)
-        .json({ status: false, message: "Account already verified." });
-    }
+    // if (user.isPhoneVerified) {
+    //   return res
+    //     .status(300)
+    //     .json({ status: false, message: "Account already verified." });
+    // }
     if (user.phone_OTP === otp) {
       await Users.findOneAndUpdate({ _id: id }, { isPhoneVerified: true });
       user = await Users.findById(id);
