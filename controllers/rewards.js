@@ -139,6 +139,15 @@ const addSpecialCoupon = async (req, res) => {
   }
 };
 
+const getSpecialCoupon = async (req, res) => {
+  try {
+    const coupon = await SpecialCouponCode.find();
+    res.status(200).json({ coupons: coupon });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   myReferralLink,
   usedCodes,
@@ -146,4 +155,5 @@ module.exports = {
   getDiscountPercentageFromCode,
   addCoupon,
   addSpecialCoupon,
+  getSpecialCoupon,
 };

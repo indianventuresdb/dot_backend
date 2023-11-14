@@ -194,6 +194,25 @@ exports.verify = async (req, res) => {
   }
 };
 
+exports.createEmployeeAccount = async (req, res) => {
+  try {
+    const { name, email, phone, password, adminType } = req.body;
+    const otp = generateOTP();
+    const employee = await Users.create({
+      name,
+      email,
+      phone,
+      phone_OTP: otp.toString(),
+      password,
+      adminType,
+    });
+    res.status(201).json({ message: "Account created", user: employee });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal Server ERROR" });
+  }
+};
+
 // User Login Controller
 exports.login = async (req, res) => {
   const { email, password } = req.body;

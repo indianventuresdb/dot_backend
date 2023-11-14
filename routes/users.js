@@ -14,6 +14,7 @@ const {
   verifyUser,
   resetPasswordOtp,
   resetPassword,
+  createEmployeeAccount,
   updateProfile,
 } = require("../controllers/user.js");
 const { isAuthenticated } = require("../middlewares/auth.js");
@@ -53,5 +54,7 @@ router.post("/update", isAuthenticated, updateProfile);
 router.post("/resetPasswordOtp", resetPasswordOtp);
 
 router.post("/resetPassword", resetPassword);
+
+router.post("/employee/register", createEmployeeAccount);
 
 module.exports = router;
