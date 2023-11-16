@@ -63,6 +63,9 @@ const products = new mongoose.Schema(
     hsn: {
       type: String,
     },
+    keywords: {
+      type: String,
+    },
     mrp: {
       type: Number,
       required: true,
