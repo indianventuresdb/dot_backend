@@ -251,6 +251,32 @@ const getOneProductDetail = async (req, res) => {
   }
 };
 
+const getOneProductDetailBySlug = async (req, res) => {
+  const { slug } = req.params;
+  try {
+    const product = await Products.findOne({ slug: slug });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found error 404" });
+    }
+    product.viewCount = product.viewCount + 1;
+    await product.save();
+
+    const sanitizedProduct = {
+      ...product.toObject(),
+      viewCount: undefined,
+      sold: undefined,
+      quantity: undefined,
+      createdAt: undefined,
+      updatedAt: undefined,
+      __v: undefined,
+    };
+
+    res.status(200).json(sanitizedProduct);
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 const productNumbers = async (req, res) => {
   try {
     const documentCount = await Products.count({});
@@ -299,6 +325,7 @@ module.exports = {
   deleteImage,
   getOneProduct,
   getOneProductDetail,
+  getOneProductDetailBySlug,
   productNumbers,
   productOfParticularCategory,
   productQuantity,
