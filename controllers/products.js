@@ -151,7 +151,11 @@ const updateProducts = async (req, res) => {
   if (secondImage) images.push(secondImage);
   if (thirdImage) images.push(thirdImage);
   let discount = ((mrp - offeredPrice) / mrp) * 100;
-  const slug = generateSlug(productName);
+  let slug;
+  try {
+    const existingSlugs = await Products.distinct("slug");
+    slug = generateSlug(productName, existingSlugs);
+  } catch (error) {}
   const tagArray = tags.split(",");
 
   try {
