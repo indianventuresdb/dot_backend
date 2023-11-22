@@ -451,6 +451,27 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
+exports.updatePassword = async (req, res) => {
+  const userId = req.user;
+  const { oldPassword, password } = req.body;
+
+  try {
+    const user = await Users.findById(userId).select("+password");
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+
+    await user.save();
+    res.status(201).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 exports.resetPasswordOtp = async (req, res) => {
   const { email } = req.body;
   const phone_OTP = generateOTP();

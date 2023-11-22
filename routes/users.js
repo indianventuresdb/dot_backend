@@ -16,6 +16,7 @@ const {
   resetPassword,
   createEmployeeAccount,
   updateProfile,
+  updatePassword,
 } = require("../controllers/user.js");
 const { isAuthenticated } = require("../middlewares/auth.js");
 const {
@@ -50,6 +51,8 @@ router.get("/getusers/:adminType", fetchUsers);
 router.get("/detail/:id", userProfile);
 
 router.post("/update", isAuthenticated, updateProfile);
+
+router.post("/update/pwd", isAuthenticated, updatePassword);
 
 router.post("/resetPasswordOtp", resetPasswordOtp);
 
