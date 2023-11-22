@@ -330,8 +330,10 @@ exports.getMyProfile = async (req, res) => {
 
   try {
     const user = await Users.findById(id);
-    const { name, email, phone } = user;
-    res.status(200).json({ success: true, name, email, phone });
+    const { name, email, phone, adminType } = user;
+    res
+      .status(200)
+      .json({ success: true, name, email, phone, employeeType: adminType });
   } catch (error) {
     return res
       .status(404)
