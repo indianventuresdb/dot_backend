@@ -55,7 +55,7 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
       sameSite: "none",
     })
     .status(statusCode)
-    .json({ userType: path, token: btoa(token) });
+    .json({ userType: path, userId: user._id, token: btoa(token) });
 };
 
 // User Register Controller
