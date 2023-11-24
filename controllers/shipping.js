@@ -31,28 +31,36 @@ const checkPincodeService = async (req, res) => {
 };
 
 const placeDispatch = async (req, res) => {
-  const formData = req.body.data;
-  console.log(formData);
-  try {
-    const response = await fetch(data.baseUrl + "/cmu/create.json", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Token ${data.token}`,
-      },
-      body: (formData),
-    });
-    if (!response.ok) {
-      throw new Error(response.statusText);
-    }
-    const responseData = await response.json();
-    console.log(responseData);
-    res.status(201).json({ message: "Dispatch placed" });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
+  const formData = req.body;
+
+  var myHeaders = new Headers();
+  myHeaders.append("Authorization", `Token ${data.token}`);
+  myHeaders.append("Content-Type", "application/json");
+
+  const requestData = {
+    shipments: formData.shipments,
+    pickup_location: formData.pickup_location,
+  };
+
+  const raw = "format=json&data=" + JSON.stringify(requestData);
+
+  var requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: raw,
+    redirect: "follow",
+  };
+
+  fetch("https://track.delhivery.com/api/cmu/create.json", requestOptions)
+    .then((response) => response.json())
+    .then((result) =>
+      result.status === true
+        ? res.status(201).json({ message: "Dispatch Placed", result: result })
+        : res.status(302).json({ message: "Dispatch Failed", result: result })
+    )
+    .catch((error) =>
+      res.status(500).json({ message: "Internal Server Error" })
+    );
 };
 
 module.exports = { getKey, checkPincodeService, placeDispatch };
