@@ -1,3 +1,4 @@
+const { Orders } = require("../models/orders");
 const data = require("../config/delhivery");
 
 const getKey = async (req, res) => {
@@ -12,7 +13,7 @@ const checkPincodeService = async (req, res) => {
   const { pincode } = req.query;
   try {
     const response = await fetch(
-      data.baseUrl + "/pin-codes/json/?filter_codes=" + pincode,
+      data.baseUrl + "/c/api/pin-codes/json/?filter_codes=" + pincode,
       {
         headers: {
           "Content-Type": "application/json",
@@ -30,8 +31,31 @@ const checkPincodeService = async (req, res) => {
   }
 };
 
+const getWayBill = async (req, res) => {
+  try {
+    const response = await fetch(
+      data.baseUrl + "/waybill/api/bulk/json/?count=1",
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Token ${data.token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Error");
+    }
+    const responseData = await response.json();
+    res.status(201).json({ waybill: responseData });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 const placeDispatch = async (req, res) => {
   const formData = req.body;
+  const { orderId, waybill } = formData;
 
   var myHeaders = new Headers();
   myHeaders.append("Authorization", `Token ${data.token}`);
@@ -51,16 +75,24 @@ const placeDispatch = async (req, res) => {
     redirect: "follow",
   };
 
-  fetch("https://track.delhivery.com/api/cmu/create.json", requestOptions)
+  fetch(data.baseUrl + "/api/cmu/create.json", requestOptions)
     .then((response) => response.json())
-    .then((result) =>
-      result.status === true
-        ? res.status(201).json({ message: "Dispatch Placed", result: result })
-        : res.status(302).json({ message: "Dispatch Failed", result: result })
-    )
+    .then(async (result) => {
+      console.log(result);
+      if (result.success === true) {
+        console.log("waybill before update:", waybill);
+        await Orders.findByIdAndUpdate(orderId, {
+          status: "Dispatched",
+          wayBill: waybill,
+        });
+        res.status(201).json({ message: "Dispatch Placed", result: result });
+      } else {
+        res.status(302).json({ message: "Dispatch Failed", result: result });
+      }
+    })
     .catch((error) =>
       res.status(500).json({ message: "Internal Server Error" })
     );
 };
 
-module.exports = { getKey, checkPincodeService, placeDispatch };
+module.exports = { getKey, checkPincodeService, getWayBill, placeDispatch };

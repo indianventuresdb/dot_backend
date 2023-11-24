@@ -4,11 +4,13 @@ const router = express.Router();
 const {
   getKey,
   checkPincodeService,
+  getWayBill,
   placeDispatch,
 } = require("../controllers/shipping");
 
 router.get("/key", getKey);
 router.get("/pincode_services", checkPincodeService);
+router.get("/waybill", getWayBill);
 
 router.post("/dispatch/forward", placeDispatch);
 
