@@ -95,4 +95,57 @@ const placeDispatch = async (req, res) => {
     );
 };
 
-module.exports = { getKey, checkPincodeService, getWayBill, placeDispatch };
+const trackShipmentByWayBill = async (req, res) => {
+  try {
+    const { wayBill } = req.query;
+    const response = await fetch(
+      data.baseUrl + "/api/v1/packages/json/?waybill=" + wayBill,
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Token ${data.token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Error in shipment");
+    }
+    const responseData = await response.json();
+    res.status(201).json(responseData);
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const generateShipmentLabel = async (req, res) => {
+  try {
+    const { wayBill } = req.query;
+    const response = await fetch(
+      data.baseUrl + `/api/p/packing_slip?wbns=${wayBill}&pdf=true`,
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Token ${data.token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Error in shipment label generation");
+    }
+    const responseData = await response.json();
+    res.status(201).json({ message: "Shipment Generated", data: responseData });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = {
+  getKey,
+  checkPincodeService,
+  getWayBill,
+  placeDispatch,
+  trackShipmentByWayBill,
+  generateShipmentLabel,
+};
