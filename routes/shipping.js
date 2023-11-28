@@ -8,6 +8,7 @@ const {
   placeDispatch,
   trackShipmentByWayBill,
   generateShipmentLabel,
+  pickupRequest,
 } = require("../controllers/shipping");
 
 router.get("/key", getKey);
@@ -17,5 +18,6 @@ router.get("/track", trackShipmentByWayBill);
 router.get("/shipmentLabel", generateShipmentLabel);
 
 router.post("/dispatch/forward", placeDispatch);
+router.post("/pickup", pickupRequest);
 
 module.exports = router;

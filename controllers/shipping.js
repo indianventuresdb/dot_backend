@@ -78,7 +78,6 @@ const placeDispatch = async (req, res) => {
   fetch(data.baseUrl + "/api/cmu/create.json", requestOptions)
     .then((response) => response.json())
     .then(async (result) => {
-      console.log(result);
       if (result.success === true) {
         console.log("waybill before update:", waybill);
         await Orders.findByIdAndUpdate(orderId, {
@@ -136,8 +135,42 @@ const generateShipmentLabel = async (req, res) => {
     }
     const responseData = await response.json();
     res.status(201).json({ message: "Shipment Generated", data: responseData });
+  } catch (error) {}
+};
+
+const pickupRequest = async (req, res) => {
+  const formData = req.body.data;
+  try {
+    const response = await fetch(data.baseUrl + "/​fm/request/new/", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Token ${data.token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error");
+    }
+
+    const responseData = await response.json();
+
+    res.status(response.status).json(responseData);
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const manageNDRPackages = async (req, res) => {
+  const formData = req.body.data;
+  try {
+    res.status(200).json({ message: "NDR Updated" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -148,4 +181,6 @@ module.exports = {
   placeDispatch,
   trackShipmentByWayBill,
   generateShipmentLabel,
+  pickupRequest,
+  manageNDRPackages,
 };
