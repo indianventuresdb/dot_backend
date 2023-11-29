@@ -18,7 +18,7 @@ router.get("/pincode_services", checkPincodeService);
 router.get("/waybill", getWayBill);
 router.get("/track", trackShipmentByWayBill);
 router.get("/shipmentLabel", generateShipmentLabel);
-router.get("/ndr_api", NDRStatus);
+router.get("/ndr_status/:upl/:verbose", NDRStatus);
 
 router.post("/dispatch/forward", placeDispatch);
 router.post("/pickup", pickupRequest);

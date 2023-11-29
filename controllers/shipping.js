@@ -167,7 +167,20 @@ const pickupRequest = async (req, res) => {
 const manageNDRPackages = async (req, res) => {
   const formData = req.body.data;
   try {
-    res.status(200).json({ message: "NDR Updated" });
+    const response = await fetch(data.baseUrl + "/​fm/request/new/", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Token ${data.token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+    if (!response.ok) {
+      throw new Error("Error in NDR request");
+    }
+    const responseData = await response.json();
+    res.status(200).json(responseData);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -175,9 +188,23 @@ const manageNDRPackages = async (req, res) => {
 };
 
 const NDRStatus = async (req, res) => {
-  const formData = req.body.data;
+  const { upl, verbose } = req.params;
   try {
-    res.status(200).json({ message: "NDR Status" });
+    const response = await fetch(
+      data.baseUrl + "/api/p/update/" + upl + "?verbose=" + verbose,
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Token ${data.token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Error in fetching status");
+    }
+    const responseData = await response.json();
+    res.status(200).json(responseData);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
