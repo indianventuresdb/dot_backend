@@ -174,6 +174,16 @@ const manageNDRPackages = async (req, res) => {
   }
 };
 
+const NDRStatus = async (req, res) => {
+  const formData = req.body.data;
+  try {
+    res.status(200).json({ message: "NDR Status" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   getKey,
   checkPincodeService,
@@ -183,4 +193,5 @@ module.exports = {
   generateShipmentLabel,
   pickupRequest,
   manageNDRPackages,
+  NDRStatus,
 };
