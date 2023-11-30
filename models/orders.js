@@ -111,6 +111,9 @@ const orders = new mongoose.Schema(
       type: String,
       default: null,
     },
+    upl: {
+      type: String,
+    },
   },
   {
     timestamps: true,
