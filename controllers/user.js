@@ -55,7 +55,12 @@ const sendTokenAdmin = (user, res, path, statusCode = 200) => {
       sameSite: "none",
     })
     .status(statusCode)
-    .json({ userType: path, userId: user._id, token: btoa(token) });
+    .json({
+      status: true,
+      userType: path,
+      userId: user._id,
+      token: btoa(token),
+    });
 };
 
 // User Register Controller
@@ -274,7 +279,7 @@ exports.loginAdmin = async (req, res) => {
       if (!verifyPassword) {
         return res.status(500).json({
           status: false,
-          message: "phonenumber or password incorrect.",
+          message: "Phonenumber or Password Incorrect.",
         });
       }
       if (!user.isEmailVerified) {
@@ -300,7 +305,7 @@ exports.loginAdmin = async (req, res) => {
       }
       if (!user.isPhoneVerified) {
         return res.status(200).json({
-          status: true,
+          status: false,
           message:
             "Your account is not verified. Please check your email and verify your account.",
         });
@@ -311,6 +316,45 @@ exports.loginAdmin = async (req, res) => {
     return res
       .status(500)
       .json({ status: false, message: "Internal Server Error" });
+  }
+};
+
+exports.verifyAndLogin = async (req, res) => {
+  try {
+    const { email, password, otp } = req.body;
+
+    const user = await Users.findOne({ email }).select("+password");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid email or password." });
+    }
+
+    if (!user.isPhoneVerified) {
+      if (user.otp === otp) {
+        user.isPhoneVerified = true;
+        await user.save();
+      } else {
+        return res
+          .status(400)
+          .json({ success: false, message: "Incorrect OTP." });
+      }
+    }
+
+    sendTokenAdmin(user, res, user.adminType, 200);
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
   }
 };
 
