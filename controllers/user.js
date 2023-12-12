@@ -339,7 +339,7 @@ exports.verifyAndLogin = async (req, res) => {
     }
 
     if (!user.isPhoneVerified) {
-      if (user.otp === otp) {
+      if (user.phone_OTP === otp) {
         user.isPhoneVerified = true;
         await user.save();
       } else {
