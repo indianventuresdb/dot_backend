@@ -345,7 +345,7 @@ exports.verifyAndLogin = async (req, res) => {
       } else {
         return res
           .status(400)
-          .json({ success: false, message: "Incorrect OTP." });
+          .json({ success: false, message: "Incorrect OTP" });
       }
     }
 
