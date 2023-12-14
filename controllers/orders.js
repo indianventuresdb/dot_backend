@@ -424,3 +424,15 @@ exports.orderDelivered = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+exports.deleteOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    await Orders.findByIdAndDelete(orderId);
+    res
+      .status(200)
+      .json({ message: `Order #${orderId} Deleted Successfully.` });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
