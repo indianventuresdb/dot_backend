@@ -4,7 +4,7 @@ const { Users } = require("../models/users");
 
 const addAddress = async (req, res) => {
   const {
-    landmark,
+    addressType,
     city,
     state,
     country,
@@ -32,7 +32,7 @@ const addAddress = async (req, res) => {
   try {
     const newAddress = new Address({
       userId,
-      landmark,
+      addressType,
       city,
       state,
       country,
@@ -54,13 +54,11 @@ const addAddress = async (req, res) => {
           success: false,
           message: "Address could not saved.",
         })
-      : res
-          .status(201)
-          .json({
-            success: true,
-            message: "Address Added successful.",
-            address: newAddress,
-          });
+      : res.status(201).json({
+          success: true,
+          message: "Address Added successful.",
+          address: newAddress,
+        });
   } catch (error) {
     console.error(error);
     return res
@@ -106,7 +104,7 @@ const addressbyId = async (req, res) => {
 
 const updateAddress = async (req, res) => {
   const {
-    landmark,
+    addressType,
     city,
     state,
     country,
@@ -122,7 +120,7 @@ const updateAddress = async (req, res) => {
   try {
     const address = await Address.findByIdAndUpdate(addressId, {
       userId,
-      landmark,
+      addressType,
       city,
       state,
       country,
