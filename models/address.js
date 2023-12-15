@@ -36,8 +36,9 @@ const address = new mongoose.Schema(
       type: String,
       required: true,
     },
-    landmark: {
+    addressType: {
       type: String,
+      default: "Home",
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
