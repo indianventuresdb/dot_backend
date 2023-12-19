@@ -16,6 +16,7 @@ const salesRouter = require("./routes/sales.js");
 const categoryRouter = require("./routes/category.js");
 const testRouter = require("./routes/testing.js");
 const invoice = require("./routes/Invoices.js");
+const creativeRouter = require("./routes/creative.js");
 const { logger } = require("./middlewares/logger.js");
 const { pathToUrl } = require("./utils/pathToUrl.js");
 const fileSender = require("./routes/files.js");
@@ -92,6 +93,8 @@ app.use("/api/v1/rewards", rewardsRouter);
 
 // Use the products router
 app.use("/api/v1/products", upload.single("image"), productsRouter);
+
+app.use("/api/v1/creative", upload.single("creative"), creativeRouter);
 
 // Use the products router
 app.use("/api/v1/payment", paymentRouter);
