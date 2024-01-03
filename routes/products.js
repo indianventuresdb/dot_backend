@@ -14,6 +14,8 @@ const {
   productQuantity,
   productNumbers,
   productOfParticularCategory,
+  searchProductsWithQuery,
+  categoryFilter,
 } = require("../controllers/products.js");
 
 const router = express.Router();
@@ -28,6 +30,8 @@ router.post("/deleteimage", deleteImage);
 // Get Request routes
 router.get("/get_all_Products", getProducts);
 router.get("/search/:searchString", searchProducts);
+router.get("/query", searchProductsWithQuery)
+router.get("/category", categoryFilter)
 router.get("/product/:productId", getOneProduct);
 router.get("/slug/:slug", getOneProductDetailBySlug);
 router.get("/product/quantity/:productId", productQuantity);
