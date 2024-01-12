@@ -1,6 +1,13 @@
 const fs = require("fs");
 const { Products } = require("../models/products.js");
 const { generateSlug } = require("../utils/slugGenerator.js");
+const conversion = require("../config/conversionApi");
+const generateRandomString = require("../utils/generateRandomString.js");
+const {
+  getClientIpAddress,
+  getClientUserAgent,
+} = require("../utils/conversionapi.js");
+const generateSHA256Hash = require("../utils/generateSHA256Hash.js");
 
 const addProducts = async (req, res) => {
   const {
@@ -35,7 +42,7 @@ const addProducts = async (req, res) => {
   try {
     const existingSlugs = await Products.distinct("slug");
     slug = generateSlug(productName, existingSlugs);
-  } catch (error) { }
+  } catch (error) {}
 
   const tagArray = tags.split(",");
 
@@ -155,7 +162,7 @@ const updateProducts = async (req, res) => {
   try {
     const existingSlugs = await Products.distinct("slug");
     slug = generateSlug(productName, existingSlugs);
-  } catch (error) { }
+  } catch (error) {}
   const tagArray = tags.split(",");
 
   try {
@@ -324,7 +331,7 @@ const productOfParticularCategory = async (req, res) => {
 
 // serach products
 const searchProductsWithQuery = async (req, res) => {
-  const { search, order, page = 1, pageSize = 10 } = req.query;
+  const { search, order, page = 1, pageSize = 10, email, name } = req.query;
   const skip = (page - 1) * pageSize;
 
   try {
@@ -351,6 +358,69 @@ const searchProductsWithQuery = async (req, res) => {
     });
     const totalPages = Math.ceil(totalProductsCount / pageSize);
 
+    const ip = getClientIpAddress(req);
+    const apiVersion = process.version;
+
+    const location = await fetch(`https://ipinfo.io/${ip}/json`);
+    const locationData = await location.json();
+
+    const response = await fetch(
+      `https://graph.facebook.com/${conversion.apiVersion}/${conversion.pixelId}/events?access_token=${conversion.token}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: [
+            {
+              event_name: "Search",
+              event_time: new Date().getTime(),
+              action_source: "website",
+              event_id: generateRandomString(12),
+              success: true,
+              content_category: search,
+              search_string: search,
+              event_source_url: "https://www.augse.in/" + search,
+              content_name: "Search Products",
+              user_data: {
+                em: [
+                  generateSHA256Hash(email?.toLowerCase()?.replace(/\s/g, "")),
+                ],
+                fn: [
+                  generateSHA256Hash(name?.toLowerCase()?.replace(/\s/g, "")),
+                ],
+                ct: [
+                  generateSHA256Hash(
+                    locationData?.city?.toLowerCase()?.replace(/\s/g, "")
+                  ),
+                ],
+                st: [
+                  generateSHA256Hash(
+                    locationData?.region?.toLowerCase()?.replace(/\s/g, "")
+                  ),
+                ],
+                zp: [
+                  generateSHA256Hash(
+                    locationData?.postal?.toLowerCase()?.replace(/\s/g, "")
+                  ),
+                ],
+                country: [
+                  generateSHA256Hash(
+                    locationData?.country?.toLowerCase()?.replace(/\s/g, "")
+                  ),
+                ],
+                client_ip_address: ip,
+                client_user_agent: getClientUserAgent(req),
+              },
+            },
+          ],
+        }),
+      }
+    );
+
+    console.log(await response.json());
+
     res.status(200).json({ products, totalPages });
   } catch (error) {
     console.error(error);
@@ -358,17 +428,18 @@ const searchProductsWithQuery = async (req, res) => {
   }
 };
 
-
 const categoryFilter = async (req, res) => {
   try {
     const { categories } = req.query;
 
     if (!categories) {
-      return res.status(400).json({ error: 'Categories parameter is required.' });
+      return res
+        .status(400)
+        .json({ error: "Categories parameter is required." });
     }
 
     // Split the categories string into an array
-    const categoryArray = categories.split(',');
+    const categoryArray = categories.split(",");
 
     // Initialize an array to store the results for each category
     const results = [];
@@ -384,7 +455,7 @@ const categoryFilter = async (req, res) => {
 
       // Query the database based on the category, page, and pageSize
       const products = await Products.find({ category })
-        .collation({ locale: 'en', strength: 2 }) // Case-insensitive
+        .collation({ locale: "en", strength: 2 }) // Case-insensitive
         .sort({ category: 1, offeredPrice: 1 }) // Sort by category and then by offeredPrice
         .skip((page - 1) * pageSize)
         .limit(pageSize);
@@ -396,11 +467,9 @@ const categoryFilter = async (req, res) => {
     res.json(results);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
-}
-
-
+};
 
 module.exports = {
   addProducts,
@@ -418,5 +487,5 @@ module.exports = {
   productNumbers,
   productOfParticularCategory,
   productQuantity,
-  searchProductsWithQuery
+  searchProductsWithQuery,
 };
