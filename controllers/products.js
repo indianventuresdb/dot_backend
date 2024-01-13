@@ -1,3 +1,4 @@
+'use strict';
 const fs = require("fs");
 const { Products } = require("../models/products.js");
 const { generateSlug } = require("../utils/slugGenerator.js");
@@ -8,6 +9,21 @@ const {
   getClientUserAgent,
 } = require("../utils/conversionapi.js");
 const generateSHA256Hash = require("../utils/generateSHA256Hash.js");
+
+// Conversion api
+const bizSdk = require('facebook-nodejs-business-sdk');
+const ServerEvent = bizSdk.ServerEvent;
+const EventRequest = bizSdk.EventRequest;
+const UserData = bizSdk.UserData;
+const CustomData = bizSdk.CustomData;
+const Content = bizSdk.Content;
+
+const access_token = conversion.token;
+const pixel_id = conversion.pixelId;
+
+const api = bizSdk.FacebookAdsApi.init(access_token);
+
+
 
 const addProducts = async (req, res) => {
   const {
@@ -42,7 +58,7 @@ const addProducts = async (req, res) => {
   try {
     const existingSlugs = await Products.distinct("slug");
     slug = generateSlug(productName, existingSlugs);
-  } catch (error) {}
+  } catch (error) { }
 
   const tagArray = tags.split(",");
 
@@ -162,7 +178,7 @@ const updateProducts = async (req, res) => {
   try {
     const existingSlugs = await Products.distinct("slug");
     slug = generateSlug(productName, existingSlugs);
-  } catch (error) {}
+  } catch (error) { }
   const tagArray = tags.split(",");
 
   try {
@@ -268,6 +284,8 @@ const getOneProductDetail = async (req, res) => {
 
 const getOneProductDetailBySlug = async (req, res) => {
   const { slug } = req.params;
+  const { name, email, gender } = req.query;
+
   try {
     const product = await Products.findOne({ slug: slug });
     if (!product) {
@@ -286,6 +304,51 @@ const getOneProductDetailBySlug = async (req, res) => {
       __v: undefined,
     };
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    const ip = getClientIpAddress(req);
+
+    const location = await fetch(`https://ipinfo.io/${ip}/json`);
+    const locationData = await location.json();
+
+
+    let current_timestamp = Math.floor(new Date() / 1000);
+
+    const userData_0 = (new UserData())
+      .setEmails([email ? generateSHA256Hash(email?.toLowerCase()?.replace(/\s/g, "")) : generateSHA256Hash("email@notfound.com"?.toLowerCase()?.replace(/\s/g, ""))])
+      .setPhones([name ? generateSHA256Hash(name?.toLowerCase()?.replace(/\s/g, "")) : generateSHA256Hash("null"?.toLowerCase()?.replace(/\s/g, ""))])
+      .setCities([generateSHA256Hash(locationData.city?.toLowerCase()?.replace(/\s/g, ""))])
+      .setStates([generateSHA256Hash(locationData.region?.toLowerCase()?.replace(/\s/g, ""))])
+      .setZips([generateSHA256Hash(locationData.postal?.toLowerCase()?.replace(/\s/g, ""))])
+      .setCountries([generateSHA256Hash(locationData.country?.toLowerCase()?.replace(/\s/g, ""))])
+      .setClientIpAddress(ip)
+      .setClientUserAgent(getClientUserAgent(req));
+
+    const serverEvent_0 = (new ServerEvent())
+      .setEventName("View Content")
+      .setEventTime(current_timestamp)
+      .setUserData(userData_0)
+      .setActionSource("website")
+      .setEventSourceUrl(`https:\/\/augse.in\/products\/${slug}`);
+
+
+    const eventsData = [serverEvent_0];
+
+
+    const eventRequest = (new EventRequest(access_token, pixel_id))
+      .setEvents(eventsData);
+    eventRequest.execute().then(response => {
+      console.log('Response from Facebook Ads API:', response);
+    })
+      .catch(error => {
+        console.error('Error executing event request:', error);
+      });
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     res.status(200).json(sanitizedProduct);
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
@@ -348,7 +411,7 @@ const searchProductsWithQuery = async (req, res) => {
     if (!products || products.length === 0) {
       return res.status(200).json({ products: [], totalPages: 0 });
     }
-
+    // console.log("products")
     // Assuming you want to calculate total pages based on total products count
     const totalProductsCount = await Products.countDocuments({
       $or: [
@@ -358,68 +421,109 @@ const searchProductsWithQuery = async (req, res) => {
     });
     const totalPages = Math.ceil(totalProductsCount / pageSize);
 
+    // console.log("products Count")
     const ip = getClientIpAddress(req);
-    const apiVersion = process.version;
+    // const apiVersion = process.version;
 
     const location = await fetch(`https://ipinfo.io/${ip}/json`);
     const locationData = await location.json();
 
-    const response = await fetch(
-      `https://graph.facebook.com/${conversion.apiVersion}/${conversion.pixelId}/events?access_token=${conversion.token}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          data: [
-            {
-              event_name: "Search",
-              event_time: new Date().getTime(),
-              action_source: "website",
-              event_id: generateRandomString(12),
-              success: true,
-              content_category: search,
-              search_string: search,
-              event_source_url: "https://www.augse.in/" + search,
-              content_name: "Search Products",
-              user_data: {
-                em: [
-                  generateSHA256Hash(email?.toLowerCase()?.replace(/\s/g, "")),
-                ],
-                fn: [
-                  generateSHA256Hash(name?.toLowerCase()?.replace(/\s/g, "")),
-                ],
-                ct: [
-                  generateSHA256Hash(
-                    locationData?.city?.toLowerCase()?.replace(/\s/g, "")
-                  ),
-                ],
-                st: [
-                  generateSHA256Hash(
-                    locationData?.region?.toLowerCase()?.replace(/\s/g, "")
-                  ),
-                ],
-                zp: [
-                  generateSHA256Hash(
-                    locationData?.postal?.toLowerCase()?.replace(/\s/g, "")
-                  ),
-                ],
-                country: [
-                  generateSHA256Hash(
-                    locationData?.country?.toLowerCase()?.replace(/\s/g, "")
-                  ),
-                ],
-                client_ip_address: ip,
-                client_user_agent: getClientUserAgent(req),
-              },
-            },
-          ],
-        }),
-      }
-    );
+    // console.log(locationData)
 
-    console.log(await response.json());
+    // const response = await fetch(
+    //   `https://graph.facebook.com/${conversion.apiVersion}/${conversion.pixelId}/events?access_token=${conversion.token}`,
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       data: [
+    //         {
+    //           event_name: "Search",
+    //           event_time: new Date().getTime(),
+    //           action_source: "website",
+    //           event_id: generateRandomString(12),
+    //           success: true,
+    //           content_category: search,
+    //           search_string: search,
+    //           event_source_url: "https://www.augse.in/" + search,
+    //           content_name: "Search Products",
+    //           user_data: {
+    //             em: [
+    //               generateSHA256Hash(email?.toLowerCase()?.replace(/\s/g, "")),
+    //             ],
+    //             fn: [
+    //               generateSHA256Hash(name?.toLowerCase()?.replace(/\s/g, "")),
+    //             ],
+    //             ct: [
+    //               generateSHA256Hash(
+    //                 locationData?.city?.toLowerCase()?.replace(/\s/g, "")
+    //               ),
+    //             ],
+    //             st: [
+    //               generateSHA256Hash(
+    //                 locationData?.region?.toLowerCase()?.replace(/\s/g, "")
+    //               ),
+    //             ],
+    //             zp: [
+    //               generateSHA256Hash(
+    //                 locationData?.postal?.toLowerCase()?.replace(/\s/g, "")
+    //               ),
+    //             ],
+    //             country: [
+    //               generateSHA256Hash(
+    //                 locationData?.country?.toLowerCase()?.replace(/\s/g, "")
+    //               ),
+    //             ],
+    //             client_ip_address: ip,
+    //             client_user_agent: getClientUserAgent(req),
+    //           },
+    //         },
+    //       ],
+    //     }),
+    //   }
+    // );
+
+    // console.log(await response.json());
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    let current_timestamp = Math.floor(new Date() / 1000);
+
+    const userData_0 = (new UserData())
+      .setEmails([email ? generateSHA256Hash(email?.toLowerCase()?.replace(/\s/g, "")) : generateSHA256Hash("email@notfound.com"?.toLowerCase()?.replace(/\s/g, ""))])
+      .setPhones([name ? generateSHA256Hash(name?.toLowerCase()?.replace(/\s/g, "")) : generateSHA256Hash("null"?.toLowerCase()?.replace(/\s/g, ""))])
+      .setCities([generateSHA256Hash(locationData.city?.toLowerCase()?.replace(/\s/g, ""))])
+      .setStates([generateSHA256Hash(locationData.region?.toLowerCase()?.replace(/\s/g, ""))])
+      .setZips([generateSHA256Hash(locationData.postal?.toLowerCase()?.replace(/\s/g, ""))])
+      .setCountries([generateSHA256Hash(locationData.country?.toLowerCase()?.replace(/\s/g, ""))])
+      .setClientIpAddress(ip)
+      .setClientUserAgent(getClientUserAgent(req));
+
+    const serverEvent_0 = (new ServerEvent())
+      .setEventName("Search")
+      .setEventTime(current_timestamp)
+      .setUserData(userData_0)
+      .setActionSource("website")
+      .setEventSourceUrl(`https:\/\/augse.in\/${search}`);
+
+
+    const eventsData = [serverEvent_0];
+
+
+    const eventRequest = (new EventRequest(access_token, pixel_id))
+      .setEvents(eventsData);
+    eventRequest.execute().then(response => {
+      console.log('Response from Facebook Ads API:', response);
+    })
+      .catch(error => {
+        console.error('Error executing event request:', error);
+      });
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     res.status(200).json({ products, totalPages });
   } catch (error) {
