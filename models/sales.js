@@ -16,6 +16,10 @@ const sales = new mongoose.Schema({
     default: 0,
     required: true,
   },
+  shipping: {
+    type: Number,
+    default: 0,
+  },
   category: {
     type: Map,
     of: Number,

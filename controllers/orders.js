@@ -169,12 +169,15 @@ exports.createOrder = async (req, res) => {
           sales: cost - discount,
           category: categoryMap,
           gst: gst,
+          shipping: (cost < 3000) ? 150 : 0,
         });
       } else {
         const sales = dailySales.sales + parseFloat(cost);
         const dailygst = dailySales.gst + parseFloat(gst);
+        const dailyShipping = dailySales.shipping + (cost < 3000) ? 150 : 0;
         dailySales.sales = sales;
         dailySales.gst = dailygst;
+        dailySales.shipping = dailyShipping;
         for (const [categoryName, quantity] of categoryMap.entries()) {
           if (dailySales.category.has(categoryName)) {
             dailySales.category.set(
@@ -204,7 +207,6 @@ exports.createOrder = async (req, res) => {
       `invoice_${Math.random()}.pdf`
     );
 
-    console.log(order._id);
     generateInvoice(order._id, address, products, fullOutputPath, gst)
       .then(() => {
         console.log("Invoice generated successfully.");
