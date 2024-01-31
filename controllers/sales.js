@@ -179,19 +179,22 @@ const getSalesByDateRange = async (req, res) => {
           _id: "s1",
           totalSales: { $sum: "$sales" },
           totalGst: { $sum: "$gst" },
+          totalShipping: { $sum: "$shipping" },
         },
       },
     ]);
 
     const totalSales = result.length > 0 ? result[0].totalSales : 0;
     const totalGst = result.length > 0 ? result[0].totalGst : 0;
+    const totalShipping = result.length > 0 ? result[0].totalShipping : 0;
 
-    res.status(200).json({ totalSales, totalGst });
+    res.status(200).json({ totalSales, totalGst, totalShipping });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 module.exports = {
   getSales,
