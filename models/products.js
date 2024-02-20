@@ -81,6 +81,10 @@ const products = new mongoose.Schema(
     otherImages: {
       type: [String],
     },
+    backgroundColor: {
+      type: String,
+      default: "#FFFFFF"
+    },
     productVideo: {
       type: String,
     },
