@@ -148,6 +148,16 @@ const getSpecialCoupon = async (req, res) => {
   }
 };
 
+const deleteCoupon = async (req, res) => {
+  try {
+    const { code } = req.params;
+    await SpecialCouponCode.findOneAndDelete({ code: code });
+    res.status(201).json({ message: "Coupon Deleted" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   myReferralLink,
   usedCodes,
@@ -156,4 +166,5 @@ module.exports = {
   addCoupon,
   addSpecialCoupon,
   getSpecialCoupon,
+  deleteCoupon,
 };
