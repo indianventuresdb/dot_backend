@@ -10,7 +10,7 @@ exports.downloadImageController = async (req, res) => {
     // Construct the file paths
     const originalFilePath = path.join(__dirname, '../uploads', fileName);
     const optimizedDirectory = path.join(__dirname, '../uploads', 'optimized');
-    const optimizedFilePath = path.join(optimizedDirectory, `${fileName}_${width}x${height}.jpg`);
+    const optimizedFilePath = path.join(optimizedDirectory, `${fileName}_${width}x${height}.png`); // Change the file extension to PNG
 
     try {
         // Check if the file exists
@@ -18,11 +18,12 @@ exports.downloadImageController = async (req, res) => {
 
         // Get the original image dimensions
         const originalImage = await Jimp.read(originalFilePath);
-        const originalWidth = originalImage.bitmap.width;
-        const originalHeight = originalImage.bitmap.height;
 
         if (width && height) {
             // If width and height are provided, check for validity
+            const originalWidth = originalImage.bitmap.width;
+            const originalHeight = originalImage.bitmap.height;
+
             if (width > originalWidth || height > originalHeight) {
                 throw new Error('Requested dimensions are greater than the original image dimensions');
             }

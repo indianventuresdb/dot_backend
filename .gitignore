@@ -7,3 +7,4 @@ uploads/*.*
 invoices/*.*
 invoices
 config
+uploads/optimized/*.*
