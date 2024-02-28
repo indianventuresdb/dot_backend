@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const generateOTP = require("../utils/otpGenerator.js");
 const sendOTPByEmail = require("../utils/sendOTPByEmail.js");
+const nodemailer = require("nodemailer");
 
 const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
   let token;
