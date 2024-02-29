@@ -9,6 +9,7 @@ exports.isAuthenticated = async (req, res, next) => {
     const realtoken = atob(token);
     const decodedToken = jwt.verify(realtoken, process.env.JWT_SECRET);
     req.user = decodedToken._id;
+    req.email = decodedToken.email;
     console.log("Authenticated");
   } catch (error) {
     console.log(error);

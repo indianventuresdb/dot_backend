@@ -24,6 +24,7 @@ const {
   isLoginData,
   isRegisterData,
 } = require("../validation/users_Validation.js");
+const { taskTracking } = require("../middlewares/taskTracking.js");
 
 const router = express.Router();
 
@@ -33,7 +34,7 @@ router.post("/login", login);
 
 router.post("/customer/login", customerLogin);
 
-router.post("/login_admin", loginAdmin);
+router.post("/login_admin", taskTracking, loginAdmin);
 
 router.post("/verifyUserType", verifyUser);
 
