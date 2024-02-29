@@ -25,7 +25,6 @@ exports.taskTracking = async (req, res, next) => {
       await TaskTracking.create(taskData);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: "Internal Server Error" });
     }
   });
 

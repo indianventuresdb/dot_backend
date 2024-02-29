@@ -20,7 +20,7 @@ const addTags = async (req, res) => {
   try {
     const tag = await tagsSchema.create({ tags });
     tag
-      ? res.status(200).json({ success: true, tag })
+      ? res.status(201).json({ success: true, tag })
       : res.status(400).json({ success: false });
   } catch (error) {
     console.log(error);

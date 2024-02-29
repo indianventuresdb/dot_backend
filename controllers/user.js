@@ -40,7 +40,10 @@ const sendToken = (user, res, message, statusCode = 200, loggedBy = null) => {
 };
 
 const sendTokenAdmin = (user, res, path, statusCode = 200) => {
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+  const token = jwt.sign(
+    { _id: user._id, email: user.email },
+    process.env.JWT_SECRET
+  );
 
   res.set({
     "Content-Type": "application/json",

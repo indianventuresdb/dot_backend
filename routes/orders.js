@@ -15,6 +15,7 @@ const {
   orderDelivered,
   deleteOrder,
 } = require("../controllers/orders.js");
+const { taskTracking } = require("../middlewares/taskTracking.js");
 
 const router = express.Router();
 
@@ -33,6 +34,6 @@ router.put("/orders/:id", updateOrder);
 router.put("/orders/return/:id", returnOrder);
 router.put("/orders/cancel/:id", cancelOrder);
 
-router.delete("/orders/:orderId", deleteOrder);
+router.delete("/orders/:orderId", isAuthenticated, taskTracking, deleteOrder);
 
 module.exports = router;

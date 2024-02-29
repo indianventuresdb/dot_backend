@@ -25,7 +25,7 @@ const deleteCreative = async (req, res) => {
 
     await Creative.findByIdAndDelete(id);
 
-    res.status(200).json({ message: "Creative deleted successfully" });
+    res.status(204).json({ message: "Creative deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }

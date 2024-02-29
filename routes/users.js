@@ -60,7 +60,12 @@ router.post("/resetPasswordOtp", resetPasswordOtp);
 
 router.post("/resetPassword", resetPassword);
 
-router.post("/employee/register", createEmployeeAccount);
+router.post(
+  "/employee/register",
+  isAuthenticated,
+  taskTracking,
+  createEmployeeAccount
+);
 
 router.post("/verify_login", verifyAndLogin);
 

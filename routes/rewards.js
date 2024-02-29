@@ -9,8 +9,10 @@ const {
   addCoupon,
   addSpecialCoupon,
   getSpecialCoupon,
-  deleteCoupon
+  deleteCoupon,
 } = require("./../controllers/rewards");
+const { isAuthenticated } = require("../middlewares/auth");
+const { taskTracking } = require("../middlewares/taskTracking");
 
 router.get("/referral_link/me", myReferralLink);
 
@@ -20,12 +22,17 @@ router.get("/activeCodes/:userId", activeCodes);
 
 router.get("/getDiscountPercentage", getDiscountPercentageFromCode);
 
-router.post("/add/coupon", addCoupon);
-
-router.post("/add/coupon/special", addSpecialCoupon);
-
 router.get("/coupon/special", getSpecialCoupon);
 
-router.delete("/coupon/:code", deleteCoupon);
+router.post("/add/coupon", isAuthenticated, taskTracking, addCoupon);
+
+router.post(
+  "/add/coupon/special",
+  isAuthenticated,
+  taskTracking,
+  addSpecialCoupon
+);
+
+router.delete("/coupon/:code", isAuthenticated, taskTracking, deleteCoupon);
 
 module.exports = router;

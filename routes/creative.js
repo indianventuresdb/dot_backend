@@ -6,11 +6,13 @@ const {
   deleteCreative,
   getCreatives,
 } = require("../controllers/creative");
+const { isAuthenticated } = require("../middlewares/auth");
+const { taskTracking } = require("../middlewares/taskTracking");
 
 router.get("/:type", getCreatives);
 
-router.post("/", addCreative);
+router.post("/", isAuthenticated, taskTracking, addCreative);
 
-router.delete("/:id", deleteCreative);
+router.delete("/:id", isAuthenticated, taskTracking, deleteCreative);
 
 module.exports = router;

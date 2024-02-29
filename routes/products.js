@@ -17,21 +17,28 @@ const {
   searchProductsWithQuery,
   categoryFilter,
 } = require("../controllers/products.js");
+const { isAuthenticated } = require("../middlewares/auth.js");
+const { taskTracking } = require("../middlewares/taskTracking.js");
 
 const router = express.Router();
 
-router.post("/add_product", addProducts);
+router.post("/add_product", isAuthenticated, taskTracking, addProducts);
 router.put("/hide_product/:productId", hideProducts);
 router.put("/show_product/:productId", showProducts);
-router.put("/update_product/:productId", updateProducts);
+router.put(
+  "/update_product/:productId",
+  isAuthenticated,
+  taskTracking,
+  updateProducts
+);
 router.post("/addimage", addImage);
 router.post("/deleteimage", deleteImage);
 
 // Get Request routes
 router.get("/get_all_Products", getProducts);
 router.get("/search/:searchString", searchProducts);
-router.get("/query", searchProductsWithQuery)
-router.get("/category", categoryFilter)
+router.get("/query", searchProductsWithQuery);
+router.get("/category", categoryFilter);
 router.get("/product/:productId", getOneProduct);
 router.get("/slug/:slug", getOneProductDetailBySlug);
 router.get("/product/quantity/:productId", productQuantity);
