@@ -4,10 +4,12 @@ const getTags = async (req, res) => {
   try {
     const tags = await tagsSchema.find();
 
-    if (!tags || tags.length === 0) {
+    if (!tags) {
       res.status(404).json({ success: false, message: "Tags not found" });
     } else {
-      res.status(200).json({ success: true, tags: tags.map((item) => item.tags) });
+      res
+        .status(200)
+        .json({ success: true, tags: tags.map((item) => item.tags) });
     }
   } catch (error) {
     console.error(error);
@@ -17,7 +19,7 @@ const getTags = async (req, res) => {
 
 const addTags = async (req, res) => {
   const tags = req.body.data;
-  
+
   try {
     const tag = await tagsSchema.create({ tags });
     if (tag) {
