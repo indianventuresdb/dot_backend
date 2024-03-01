@@ -2,33 +2,29 @@ const { categorySchema } = require("../models/category");
 
 const getCategory = async (req, res) => {
   try {
-    const categories = await categorySchema.find();
+    const category = await categorySchema.find();
 
-    if (!categories || categories.length === 0) {
-      res.status(404).json({ success: false, message: "Categories not found" });
-    } else {
-      res.status(200).json({ success: true, categories: categories.map((item) => item.category) });
+    if (!category) {
+      res.status(300).json({ message: "Categories not found" });
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res
+      .status(200)
+      .json({ success: true, category: category.map((item) => item.category) });
+  } catch {
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
 
 const addCategory = async (req, res) => {
   const category = req.body.data;
-
   try {
-    const newCategory = await categorySchema.create({ category });
-
-    if (newCategory) {
-      res.status(201).json({ success: true, category: newCategory });
-    } else {
-      res.status(400).json({ success: false, message: "Bad Request" });
-    }
+    const cat = await categorySchema.create({ category });
+    cat
+      ? res.status(200).json({ success: true, category: cat })
+      : res.status(400).json({ success: false });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    console.log(error);
+    res.status(401).json({ success: false });
   }
 };
 
