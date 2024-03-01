@@ -27,7 +27,12 @@ router.get("/orders/user/:userId", getOrderByUserId);
 router.get("/pending/orders", getPendingOrders);
 router.get("/count", ordersNumbers);
 
-router.put("/orders/readyToDispatch/:orderId", orderReadyToDispatch);
+router.put(
+  "/orders/readyToDispatch/:orderId",
+  isAuthenticated,
+  taskTracking,
+  orderReadyToDispatch
+);
 router.put("/orders/dispatched/:orderId", orderDispatched);
 router.put("/orders/delivered/:orderId", orderDelivered);
 router.put("/orders/:id", updateOrder);

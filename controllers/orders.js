@@ -169,7 +169,7 @@ exports.createOrder = async (req, res) => {
           sales: cost - discount,
           category: categoryMap,
           gst: gst,
-          shipping: (cost < 3000) ? 150 : 0,
+          shipping: cost < 3000 ? 150 : 0,
         });
       } else {
         const sales = dailySales.sales + parseFloat(cost);
@@ -378,19 +378,23 @@ exports.getPendingOrders = async (req, res) => {
 
 exports.orderReadyToDispatch = async (req, res) => {
   const { orderId } = req.params;
+
   try {
-    const order = await Orders.findByIdAndUpdate(orderId, {
+    const updatedOrder = await Orders.findByIdAndUpdate(orderId, {
       status: "Ready To Dispatch",
       packed: new Date(),
     });
-    if (!order) {
-      return res.status(404).json({ message: "Order Not Found" });
+
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
-    res.status(201).json({ message: "Order Ready To Dispatch" });
+
+    res.status(200).json({ success: true, message: "Order ready to dispatch successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
 
 exports.orderDispatched = async (req, res) => {
   const { orderId } = req.params;
@@ -413,28 +417,42 @@ exports.orderDispatched = async (req, res) => {
 
 exports.orderDelivered = async (req, res) => {
   const { orderId } = req.params;
+
   try {
-    const order = await Orders.findByIdAndUpdate(orderId, {
+    const updatedOrder = await Orders.findByIdAndUpdate(orderId, {
       status: "Delivered",
       delivered: new Date(),
     });
-    if (!order) {
-      return res.status(404).json({ message: "Order Not Found" });
+
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
-    res.status(201).json({ message: "Order Delivered" });
+
+    res.status(200).json({ success: true, message: "Order delivered successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
 
 exports.deleteOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
-    await Orders.findByIdAndDelete(orderId);
-    res
-      .status(200)
-      .json({ message: `Order #${orderId} Deleted Successfully.` });
+    const deletedOrder = await Orders.findByIdAndDelete(orderId);
+
+    if (deletedOrder) {
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: `Order #${orderId} deleted successfully`,
+        });
+    } else {
+      res
+        .status(404)
+        .json({ success: false, message: `Order #${orderId} not found` });
+    }
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
