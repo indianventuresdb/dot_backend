@@ -85,26 +85,30 @@ const getDiscountPercentageFromCode = async (req, res) => {
 
 const addCoupon = async (req, res) => {
   const { code, tier, discountPercentage, description } = req.body;
+
   try {
     const existingCoupon = await CouponCode.findOne({ code });
+
     if (existingCoupon) {
-      return res.status(400).json({ message: "Coupon code already exists" });
+      return res.status(400).json({ success: false, message: "Coupon code already exists" });
     }
+
     const newCoupon = new CouponCode({
       code,
       tier,
       discountPercentage,
       description,
     });
+
     await newCoupon.save();
-    res
-      .status(201)
-      .json({ message: "Coupon added successfully", coupon: newCoupon });
+
+    res.status(201).json({ success: true, message: "Coupon added successfully", coupon: newCoupon });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
 
 const addSpecialCoupon = async (req, res) => {
   try {
@@ -133,11 +137,13 @@ const addSpecialCoupon = async (req, res) => {
 
     const savedCoupon = await newCoupon.save();
 
-    res.status(201).json(savedCoupon);
+    res.status(201).json({ success: true, coupon: savedCoupon });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error(error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
+
 
 const getSpecialCoupon = async (req, res) => {
   try {

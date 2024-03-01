@@ -36,7 +36,7 @@ const addProducts = async (req, res) => {
   try {
     const existingSlugs = await Products.distinct("slug");
     slug = generateSlug(productName, existingSlugs);
-  } catch (error) { }
+  } catch (error) {}
 
   const tagArray = tags.split(",");
 
@@ -70,7 +70,7 @@ const addProducts = async (req, res) => {
     return res.status(200).json({ message: "Product added successfully." });
   } catch (error) {
     return res
-      .status(300)
+      .status(500)
       .json({ message: "Product add failed, server error..." });
   }
 };
@@ -158,7 +158,7 @@ const updateProducts = async (req, res) => {
   try {
     const existingSlugs = await Products.distinct("slug");
     slug = generateSlug(productName, existingSlugs);
-  } catch (error) { }
+  } catch (error) {}
   const tagArray = tags.split(",");
 
   try {
@@ -187,10 +187,15 @@ const updateProducts = async (req, res) => {
     });
     // Turnory Oprator
     !product
-      ? res.status(300).json({ message: "Product can not updated" })
-      : res.status(200).json({ message: "Product updated successfully" });
+      ? res
+          .status(400)
+          .json({ success: false, message: "Product cannot be updated" })
+      : res
+          .status(200)
+          .json({ success: true, message: "Product updated successfully" });
   } catch (error) {
-    res.status(300).json({ message: "Product can not updated" });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -362,17 +367,18 @@ const searchProductsWithQuery = async (req, res) => {
   }
 };
 
-
 const categoryFilter = async (req, res) => {
   try {
     const { categories } = req.query;
 
     if (!categories) {
-      return res.status(400).json({ error: 'Categories parameter is required.' });
+      return res
+        .status(400)
+        .json({ error: "Categories parameter is required." });
     }
 
     // Split the categories string into an array
-    const categoryArray = categories.split(',');
+    const categoryArray = categories.split(",");
 
     // Initialize an array to store the results for each category
     const results = [];
@@ -388,7 +394,7 @@ const categoryFilter = async (req, res) => {
 
       // Query the database based on the category, page, and pageSize
       const products = await Products.find({ category })
-        .collation({ locale: 'en', strength: 2 }) // Case-insensitive
+        .collation({ locale: "en", strength: 2 }) // Case-insensitive
         .sort({ category: 1, offeredPrice: 1 }) // Sort by category and then by offeredPrice
         .skip((page - 1) * pageSize)
         .limit(pageSize);
@@ -400,11 +406,9 @@ const categoryFilter = async (req, res) => {
     res.json(results);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
-}
-
-
+};
 
 module.exports = {
   addProducts,
@@ -422,5 +426,5 @@ module.exports = {
   productNumbers,
   productOfParticularCategory,
   productQuantity,
-  searchProductsWithQuery
+  searchProductsWithQuery,
 };

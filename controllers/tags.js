@@ -4,27 +4,30 @@ const getTags = async (req, res) => {
   try {
     const tags = await tagsSchema.find();
 
-    if (!tags) {
-      res.status(300).json({ message: "Tgas not found" });
+    if (!tags || tags.length === 0) {
+      res.status(404).json({ success: false, message: "Tags not found" });
+    } else {
+      res.status(200).json({ success: true, tags: tags.map((item) => item.tags) });
     }
-    res
-      .status(200)
-      .json({ success: true, tags: tags.map((item) => item.tags) });
-  } catch {
-    return res.status(500).json({ message: "Internal server error." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
 const addTags = async (req, res) => {
   const tags = req.body.data;
+  
   try {
     const tag = await tagsSchema.create({ tags });
-    tag
-      ? res.status(201).json({ success: true, tag })
-      : res.status(400).json({ success: false });
+    if (tag) {
+      res.status(201).json({ success: true, tag });
+    } else {
+      res.status(400).json({ success: false, message: "Bad Request" });
+    }
   } catch (error) {
-    console.log(error);
-    res.status(401).json({ success: false });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
