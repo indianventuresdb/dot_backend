@@ -17,6 +17,7 @@ const categoryRouter = require("./routes/category.js");
 const testRouter = require("./routes/testing.js");
 const invoice = require("./routes/Invoices.js");
 const creativeRouter = require("./routes/creative.js");
+const tasksRouter = require("./routes/taskTracking.js");
 const { logger } = require("./middlewares/logger.js");
 const { pathToUrl } = require("./utils/pathToUrl.js");
 const fileSender = require("./routes/files.js");
@@ -107,6 +108,8 @@ app.use("/files", fileSender);
 
 // Use the fileSender router
 app.use("/slider", sliderRouter);
+
+app.use("/api/v1/tasks-tracking", tasksRouter);
 
 // file Uploader
 app.post("/upload/:type", upload.single("file"), async function (req, res) {
