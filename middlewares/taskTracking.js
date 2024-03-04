@@ -2,7 +2,8 @@ const { TaskTracking } = require("../models/taskTracking");
 
 exports.taskTracking = async (req, res, next) => {
   if (req.get("Host") === "admin.augse.in") {
-    let taskData = {};
+    let taskData = {},
+      date = new Date();
 
     res.on("finish", async function () {
       taskData = {
@@ -10,7 +11,8 @@ exports.taskTracking = async (req, res, next) => {
         statusCode: res.statusCode,
         statusMessage: res.statusMessage,
         method: req.method,
-        task: decodeURI(req.url),
+        task: req.originalUrl,
+        time: date,
       };
 
       switch (decodeURI(req.url)) {
@@ -29,6 +31,5 @@ exports.taskTracking = async (req, res, next) => {
     });
   }
 
-  // Continue with the middleware chain
   next();
 };
