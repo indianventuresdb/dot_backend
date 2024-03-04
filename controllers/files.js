@@ -1,8 +1,12 @@
-const Jimp = require('jimp');
-const path = require("path");
-const fs = require("fs").promises;
+const path = require('path');
+const fs = require('fs').promises;
+const sharp = require('sharp');
+
+// Cache to store processed images
+const imageCache = new Map();
 
 exports.downloadImageController = async (req, res) => {
+
     const fileName = req.params.fileName;
     const width = parseInt(req.query.width);
     const height = parseInt(req.query.height);
@@ -10,19 +14,18 @@ exports.downloadImageController = async (req, res) => {
     // Construct the file paths
     const originalFilePath = path.join(__dirname, '../uploads', fileName);
     const optimizedDirectory = path.join(__dirname, '../uploads', 'optimized');
-    const optimizedFilePath = path.join(optimizedDirectory, `${fileName}_${width}x${height}.png`); // Change the file extension to PNG
+    const optimizedFilePath = path.join(optimizedDirectory, `${fileName}_${width}x${height}.webp`); // Change the file extension to WebP
 
     try {
         // Check if the file exists
         await fs.access(originalFilePath);
 
-        // Get the original image dimensions
-        const originalImage = await Jimp.read(originalFilePath);
-
         if (width && height) {
             // If width and height are provided, check for validity
-            const originalWidth = originalImage.bitmap.width;
-            const originalHeight = originalImage.bitmap.height;
+            const originalImage = sharp(originalFilePath);
+            const metadata = await originalImage.metadata();
+            const originalWidth = metadata.width;
+            const originalHeight = metadata.height;
 
             if (width > originalWidth || height > originalHeight) {
                 throw new Error('Requested dimensions are greater than the original image dimensions');
@@ -30,20 +33,27 @@ exports.downloadImageController = async (req, res) => {
 
             await fs.mkdir(optimizedDirectory, { recursive: true });
 
-            const optimizedFileExists = await fs.access(optimizedFilePath).then(() => true).catch(() => false);
-
-            if (!optimizedFileExists) {
+            // Check if the optimized image is in the cache
+            if (!imageCache.has(optimizedFilePath)) {
                 console.log('Optimizing image...');
-                const image = await originalImage.clone();
 
-                await image
-                    .resize(width, height)
-                    .writeAsync(optimizedFilePath);
+                const optimizedImageBuffer = await originalImage
+                    .resize(width, height, { fit: 'inside', withoutEnlargement: true })
+                    .toFormat('webp', { quality: 100 })
+                    .toBuffer();
+
+                // Save to cache
+                imageCache.set(optimizedFilePath, {
+                    width: originalWidth,
+                    height: originalHeight,
+                    buffer: optimizedImageBuffer,
+                });
 
                 console.log('Image optimized successfully.');
             }
 
-            res.sendFile(optimizedFilePath);
+            // Send the optimized image from cache
+            res.type('image/webp').send(imageCache.get(optimizedFilePath).buffer);
         } else {
             // If width and height are not provided, send the original file
             res.sendFile(originalFilePath);
