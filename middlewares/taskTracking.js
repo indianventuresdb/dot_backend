@@ -1,6 +1,7 @@
 const { TaskTracking } = require("../models/taskTracking");
 
 exports.taskTracking = async (req, res, next) => {
+  console.log(req.get("Host"));
   if (req.get("Host") === "admin.augse.in") {
     let taskData = {},
       date = new Date();
