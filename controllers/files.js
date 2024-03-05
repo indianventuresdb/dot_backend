@@ -52,10 +52,17 @@ exports.downloadImageController = async (req, res) => {
                 console.log('Image optimized successfully.');
             }
 
+            // Set cache-control headers
+            res.set('Cache-Control', `public, max-age=3600, must-revalidate`);
+
             // Send the optimized image from cache
             res.type('image/webp').send(imageCache.get(optimizedFilePath).buffer);
         } else {
             // If width and height are not provided, send the original file
+
+            // Set cache-control headers for the original file
+            res.set('Cache-Control', `public, max-age=3600, must-revalidate`);
+
             res.sendFile(originalFilePath);
         }
     } catch (err) {

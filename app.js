@@ -40,6 +40,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static("public"));
+app.use((req, res, next) => {
+  res.setHeader('X-Powered-By', 'Indian Ventures Pvt. Ltd.');
+  next();
+});
 
 // disk multer
 const storage = multer.diskStorage({
