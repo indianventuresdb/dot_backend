@@ -290,6 +290,7 @@ const getOneProductDetailBySlug = async (req, res) => {
 
     res.status(200).json(sanitizedProduct);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
