@@ -180,7 +180,7 @@ const updateProducts = async (req, res) => {
       offeredPrice,
       hsn,
       keywords,
-      slug,
+      // slug,
       detailedDescription,
       mainImage,
       otherImages: images,
