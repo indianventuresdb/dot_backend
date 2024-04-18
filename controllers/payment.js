@@ -57,6 +57,8 @@ exports.checkOut = async (req, res) => {
       body: JSON.stringify({ request: base64Encoded }),
     };
 
+    console.log(transactionId);
+
     const response = await fetch(
       "https://api.phonepe.com/apis/hermes/pg/v1/pay",
       option
@@ -70,6 +72,7 @@ exports.checkOut = async (req, res) => {
       redirectTo: responseData.data.instrumentResponse.redirectInfo.url,
     });
   } catch (error) {
+    console.log(error);
     res.redirect(process.env.FRONTEND + `/unsuccess?orderId=${orderId}`);
   }
 };
