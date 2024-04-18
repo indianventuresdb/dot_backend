@@ -56,7 +56,7 @@ exports.createOrder = async (req, res) => {
     price = arr[0];
     cost = arr[3];
     gst = arr[4];
-    if (cost < 3000) price = parseFloat(price) + 150;
+    // if (cost < 3000) price = parseFloat(price) + 150;
     isReturnable = arr[1];
     isCancelable = arr[2];
     discount = arr[5];
@@ -67,7 +67,6 @@ exports.createOrder = async (req, res) => {
       .json({ success: false, message: "Failed to calculate price" });
   }
 
-  console.log(price, cost, gst, discount);
   try {
     if (!coupon && discount != 0) {
       const specialCoupon = await SpecialCouponCode.findOne({
@@ -169,15 +168,15 @@ exports.createOrder = async (req, res) => {
           sales: cost - discount,
           category: categoryMap,
           gst: gst,
-          shipping: cost < 3000 ? 150 : 0,
+          shipping: 0,
         });
       } else {
         const sales = dailySales.sales + parseFloat(cost);
         const dailygst = dailySales.gst + parseFloat(gst);
-        const dailyShipping = dailySales.shipping + (cost < 3000) ? 150 : 0;
+        // const dailyShipping = dailySales.shipping + (cost < 3000) ? 150 : 0;
         dailySales.sales = sales;
         dailySales.gst = dailygst;
-        dailySales.shipping = dailyShipping;
+        dailySales.shipping = 0;
         for (const [categoryName, quantity] of categoryMap.entries()) {
           if (dailySales.category.has(categoryName)) {
             dailySales.category.set(
@@ -386,15 +385,18 @@ exports.orderReadyToDispatch = async (req, res) => {
     });
 
     if (!updatedOrder) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
-    res.status(200).json({ success: true, message: "Order ready to dispatch successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Order ready to dispatch successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
-
 
 exports.orderDispatched = async (req, res) => {
   const { orderId } = req.params;
@@ -425,15 +427,18 @@ exports.orderDelivered = async (req, res) => {
     });
 
     if (!updatedOrder) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
-    res.status(200).json({ success: true, message: "Order delivered successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Order delivered successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
-
 
 exports.deleteOrder = async (req, res) => {
   try {
@@ -441,12 +446,10 @@ exports.deleteOrder = async (req, res) => {
     const deletedOrder = await Orders.findByIdAndDelete(orderId);
 
     if (deletedOrder) {
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: `Order #${orderId} deleted successfully`,
-        });
+      res.status(200).json({
+        success: true,
+        message: `Order #${orderId} deleted successfully`,
+      });
     } else {
       res
         .status(404)
