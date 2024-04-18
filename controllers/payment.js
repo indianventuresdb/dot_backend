@@ -87,7 +87,7 @@ exports.verifyPayment = async (req, res) => {
       }
 
       if (order.transactionId != transactionId) {
-        return res.status(404).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "Unauthorized" });
       }
 
       order.providerReferenceId = providerReferenceId;
@@ -140,15 +140,15 @@ exports.verifyPayment = async (req, res) => {
           sales: cost - discount,
           category: categoryMap,
           gst: gst,
-          shipping: (cost < 3000) ? 150 : 0,
+          shipping: 0,
         });
       } else {
         const sales = dailySales.sales + parseFloat(cost);
         const dailygst = dailySales.gst + parseFloat(gst);
-        const dailyShipping = dailySales.shipping + (cost < 3000) ? 150 : 0;
+        // const dailyShipping = dailySales.shipping + (cost < 3000) ? 150 : 0;
         dailySales.sales = sales;
         dailySales.gst = dailygst;
-        dailySales.shipping = dailyShipping;
+        dailySales.shipping = 0;
         for (const [categoryName, quantity] of categoryMap.entries()) {
           if (dailySales.category.has(categoryName)) {
             dailySales.category.set(

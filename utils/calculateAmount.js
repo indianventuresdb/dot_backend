@@ -20,7 +20,7 @@ const calculateAmount = async (products, discountPercentage) => {
 
   resolvedProducts.forEach((product, index) => {
     const { offeredPrice } = product;
-    const { tax } = product;
+    const tax = 0;
     const { isReturnAble } = product;
     const { isCancelAble } = product;
     const { quantity } = products[index];
