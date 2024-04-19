@@ -9,7 +9,10 @@ const verifySpecialCouponAuthorization = async (userId, code) => {
     if (coupon.expiryDate && coupon.expiryDate < new Date()) {
       return false;
     }
-    return coupon.discountPercentage;
+    return {
+      discountPercentage: coupon.discountPercentage,
+      minPrice: coupon.minPrice,
+    };
   } catch (error) {
     return false;
   }

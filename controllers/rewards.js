@@ -60,7 +60,12 @@ const getDiscountPercentageFromCode = async (req, res) => {
         const discountPercentage = coupon.discountPercentage;
         res
           .status(200)
-          .json({ message: "Verified", coupon: code, discountPercentage });
+          .json({
+            message: "Verified",
+            coupon: code,
+            discountPercentage,
+            minPrice: 2500,
+          });
       } else {
         res.status(404).json({ message: "Coupon not found" });
       }
@@ -73,7 +78,8 @@ const getDiscountPercentageFromCode = async (req, res) => {
         return res.status(200).json({
           message: "Verified",
           coupon: code,
-          discountPercentage: verifySpecial,
+          discountPercentage: verifySpecial.discountPercentage,
+          minPrice: verifySpecial.minPrice,
         });
       }
       res.status(403).json({ message: "Not Authorized to use this code" });
@@ -90,7 +96,9 @@ const addCoupon = async (req, res) => {
     const existingCoupon = await CouponCode.findOne({ code });
 
     if (existingCoupon) {
-      return res.status(400).json({ success: false, message: "Coupon code already exists" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Coupon code already exists" });
     }
 
     const newCoupon = new CouponCode({
@@ -102,13 +110,16 @@ const addCoupon = async (req, res) => {
 
     await newCoupon.save();
 
-    res.status(201).json({ success: true, message: "Coupon added successfully", coupon: newCoupon });
+    res.status(201).json({
+      success: true,
+      message: "Coupon added successfully",
+      coupon: newCoupon,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
-
 
 const addSpecialCoupon = async (req, res) => {
   try {
@@ -143,7 +154,6 @@ const addSpecialCoupon = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
-
 
 const getSpecialCoupon = async (req, res) => {
   try {
