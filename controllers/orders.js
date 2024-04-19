@@ -33,7 +33,7 @@ exports.createOrder = async (req, res) => {
         userId,
         couponCode
       );
-      if (verifySpecial) discountPercentage = verifySpecial;
+      if (verifySpecial) discountPercentage = verifySpecial.discountPercentage;
       else
         return res
           .status(403)
