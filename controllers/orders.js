@@ -277,7 +277,8 @@ exports.getOrderByUserId = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "Order not found" });
     }
-    res.status(200).json({ orders: user.orders });
+    const reversedOrders = user.orders.reverse();
+    res.status(200).json({ orders: reversedOrders });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
