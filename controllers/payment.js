@@ -189,13 +189,13 @@ exports.verifyPayment = async (req, res) => {
           to: orderDetail.addressId.email,
           subject: "Invoice",
           text: "Thank You for Shopping with Augse. Your Order is placed successfully & will be delivered to you within 5 to 8 working days. To track your order status. click here: https://www.augse.in/users/Orders",
-          // attachments: [
-          //   {
-          //     filename: invoiceFileName,
-          //     content: data,
-          //     encoding: "base64",
-          //   },
-          // ],
+          attachments: [
+            {
+              filename: invoiceFileName,
+              content: data,
+              encoding: "base64",
+            },
+          ],
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
