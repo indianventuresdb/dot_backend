@@ -10,7 +10,7 @@ exports.isAuthenticated = async (req, res, next) => {
     const decodedToken = jwt.verify(realtoken, process.env.JWT_SECRET);
     req.user = decodedToken._id;
     req.email = decodedToken.email;
-    console.log(decodedToken);
+    // console.log(decodedToken);
   } catch (error) {
     console.log(error);
     return res.redirect("/login.html");

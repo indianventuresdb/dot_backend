@@ -1,53 +1,5 @@
-const generateHTML = require("./tableGenerator");
-const puppeteer = require("puppeteer");
 
-
-async function convertHtmlToPdf(htmlContent, outputPath) {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-
-  // Set content to the HTML
-  await page.setContent(htmlContent);
-
-  // Generate PDF
-  await page.pdf({ path: outputPath, format: "A4" });
-
-  await browser.close();
-  console.log(`PDF generated at ${outputPath}`);
-}
-
-
-function generateUniqueString() {
-  const currentDate = new Date();
-  const year = currentDate.getFullYear();
-  const month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
-  const day = ("0" + currentDate.getDate()).slice(-2);
-  const hours = ("0" + currentDate.getHours()).slice(-2);
-  const minutes = ("0" + currentDate.getMinutes()).slice(-2);
-  const seconds = ("0" + currentDate.getSeconds()).slice(-2);
-  const milliseconds = ("00" + currentDate.getMilliseconds()).slice(-3);
-
-  return `AUG${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
-}
-
-
-function getCurrentDate() {
-  const currentDate = new Date();
-  const day = ('0' + currentDate.getDate()).slice(-2);
-  const month = ('0' + (currentDate.getMonth() + 1)).slice(-2);
-  const year = currentDate.getFullYear();
-
-  return `${day}/${month}/${year}`;
-}
-
-
-async function generateInvoice(orderID, address, products, outputPath, gst) {
-  // console.log(orderID, address, products, outputPath, gst);
-
-  // console.log(address)
-
-  const htmlCode = `
-  <!DOCTYPE html>
+<!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
@@ -140,7 +92,7 @@ async function generateInvoice(orderID, address, products, outputPath, gst) {
         <h1>Invoice No. ${generateUniqueString()}</h1>
         <p>Invoice Date : ${getCurrentDate()}</p>
       </div>
-      <p style="width:100%;padding:0rem 3rem;text-align:right;"></P>
+      <p style="width:100%;padding:0rem 3rem;text-align:right;">Order ID : ${orderID.toString().toUpperCase()}</P>
       <div class="address">
         <div class="company">
           <img
@@ -149,23 +101,15 @@ async function generateInvoice(orderID, address, products, outputPath, gst) {
             style="margin-top: -3rem;position: absolute;z-index: 3;top: 80px;transform: translateX(-50%); left: 50%;"
           />
           <div>
-          <h1>Brand : Augse</h1>
-          <h1>Organization: Drift of Thread</h1>
-          <p>Address : 190/199, Chukkuwala, Part II, Dehradun, Uttarakhand- 248001</p>
-          <p>GSTIN : 05BIMPM8421Q3ZJ</p>
-          <p>Order ID : ${orderID.toString().toUpperCase()}</p>
+            
+            <h1>Brand : Augse</h1>
+            <h1>Organization: Drift of Thread</h1>
+            <p>Address : 190/199, Chukkuwala, Part II, Dehradun, Uttarakhand- 248001</p>
+            <p>GSTIN : 05BIMPM8421Q3ZJ</p>
           </div>
         </div>
         <div class="client">
           <div style="text-align:right;">
-            <h1>Billing Details</h1>
-            <p>
-              ${address.name}
-            </p>
-            <p>${address.phone}</p>
-            <p>${address.houseNumber}, ${address.street}, ${address.city}, ${address.state}, ${address.country}, ${address.pinCode}</p>
-          </div>
-          <div style="text-align:right;margin-top: 1rem;">
             <h1>Shipping Address</h1>
             <p>
               ${address.name}
@@ -193,15 +137,99 @@ async function generateInvoice(orderID, address, products, outputPath, gst) {
         <p style="margin-top: 3rem;font-style: italic;font-weight: bold;">Thank you for shoping from Augse.</p>
       </div>
     </body>
-  </html>  
-  `;
+  </html> 
 
-  try {
-    const res = await convertHtmlToPdf(htmlCode,outputPath)
-    console.log("reposne",res)
-  } catch (error) {
-    console.log(error)
+
+
+
+
+
+
+
+
+
+<!-- 
+  new ObjectId("6630d4602ebff7f17bfa8f02") {
+  _id: new ObjectId("6620e5827aae68f2432c8303"),
+  name: 'Surendra Kamboj',
+  houseNumber: '21',
+  pinCode: 476337,
+  street: 'Jaipur',
+  country: 'India',
+  state: 'Madhya Pradesh',
+  phone: '09098420746',
+  email: 'kjassi560@gmail.com',
+  city: 'Sheopur',
+  addressType: 'Home',
+  userId: new ObjectId("6620e5587aae68f2432c82fb"),
+  createdAt: 2024-04-18T09:18:58.500Z,
+  updatedAt: 2024-04-18T09:18:58.500Z,
+  __v: 0
+} [
+  {
+    _id: '65349d632ec29a5c4473b2ab',
+    name: 'Green Grooves',
+    quantity: 1,
+    price: 6399,
+    mrp: 15000,
+    description: 'Green Apple Kanchivaram Silk with Silver Border',
+    image: 'uploads/1712319051686-1.png',
+    slug: 'green-grooves',
+    backgroundColor: '#ffffff'
+  },
+  {
+    _id: '65349f992ec29a5c4473b2c6',
+    name: 'Kaveri Kanjeevaram',
+    quantity: 1,
+    price: 6399,
+    image: 'uploads/1712318906947-2.png',
+    description: 'Crimson kanjeevaram saree with an elegant silver border\r\n',
+    mrp: 15000,
+    slug: 'kaveri-kanjeevaram',
+    backgroundColor: '#ffffff'
+  },
+  {
+    _id: '66162e16d5c9ac0d5e462e51',
+    name: 'Sheer Love',
+    quantity: 1,
+    price: 999,
+    mrp: 3499,
+    description: 'White Dotted Purple Organza with Greenery',
+    image: 'uploads/1712729617854-1.png',
+    slug: 'sheer-love-1',
+    backgroundColor: 'undefined'
+  },
+  {
+    _id: '65423623b6641ca721fa16f4',
+    name: 'Pretty Pop',
+    quantity: 1,
+    price: 1199,
+    mrp: 2800,
+    description: 'Orange Organza Tiny Green Leaf Print ',
+    image: 'uploads/1712314589725-2.png',
+    slug: 'pretty-pop',
+    backgroundColor: '#FFFFFF'
+  },
+  {
+    _id: '654239b4b6641ca721fa174b',
+    name: 'Saree Slay',
+    quantity: 1,
+    price: 999,
+    mrp: 1800,
+    description: 'Apple Green Organza with Gold and Jade Flowers ',
+    image: 'uploads/1712315133829-1.png',
+    slug: 'saree-slay',
+    backgroundColor: '#FFFFFF'
+  },
+  {
+    _id: '6542385bb6641ca721fa1731',
+    name: 'Crimson Jazz',
+    quantity: 1,
+    price: 999,
+    mrp: 2200,
+    description: 'Crimson Organza Saree with Small White Flowers',
+    image: 'uploads/1712314964846-4.png',
+    slug: 'crimson-jazz',
+    backgroundColor: '#FFFFFF'
   }
-}
-
-module.exports = generateInvoice;
+] invoices\2024-04\invoice_0.29796361157602225.pdf 0 -->
