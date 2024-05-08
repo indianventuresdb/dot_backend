@@ -17,6 +17,7 @@ const categoryRouter = require("./routes/category.js");
 const testRouter = require("./routes/testing.js");
 const invoice = require("./routes/Invoices.js");
 const creativeRouter = require("./routes/creative.js");
+const cartRouter = require("./routes/cart.js");
 const tasksRouter = require("./routes/taskTracking.js");
 const { logger } = require("./middlewares/logger.js");
 const { pathToUrl } = require("./utils/pathToUrl.js");
@@ -41,7 +42,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static("public"));
 app.use((req, res, next) => {
-  res.setHeader('X-Powered-By', 'Indian Ventures Pvt. Ltd.');
+  res.setHeader("X-Powered-By", "Indian Ventures Pvt. Ltd.");
   next();
 });
 
@@ -94,7 +95,11 @@ app.use("/api/v1/sales", salesRouter);
 // Use the orders router
 app.use("/api/v1/orders", ordersRouter);
 
+// Rewards
 app.use("/api/v1/rewards", rewardsRouter);
+
+// Cart Routes
+app.use("/api/v1/cart", cartRouter);
 
 // Use the products router
 app.use("/api/v1/products", upload.single("image"), productsRouter);

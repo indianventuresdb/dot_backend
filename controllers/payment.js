@@ -72,7 +72,7 @@ exports.checkOut = async (req, res) => {
       redirectTo: responseData.data.instrumentResponse.redirectInfo.url,
     });
   } catch (error) {
-    console.log(error);
+    console.error("payment Error : ", error);
     res.redirect(process.env.FRONTEND + `/unsuccess?orderId=${orderId}`);
   }
 };
