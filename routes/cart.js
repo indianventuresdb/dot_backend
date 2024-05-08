@@ -8,7 +8,7 @@ const {
 
 const router = express.Router();
 
-router.get("/all-items", getAllItems);
+router.get("/all-items/:userId", getAllItems);
 router.post("/add-item", add_To_Cart);
 router.put("/incr", increaseItem);
 router.put("/dcr", decreseItem);
