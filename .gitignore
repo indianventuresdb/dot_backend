@@ -8,3 +8,4 @@ invoices/*.*
 invoices
 config
 uploads/optimized/*.*
+logs
