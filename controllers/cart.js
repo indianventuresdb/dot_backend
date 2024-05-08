@@ -5,15 +5,25 @@ const add_To_Cart = async (req, res) => {
     const { userId, productId } = req.body;
     const existing = await CartProducts.findOneAndUpdate(
       { userId, productId },
-      { $inc: { quantity: 1 } },
+      { $inc: { quantity: +1 } },
       { new: true }
     );
 
     if (!existing) {
-      res
-        .status(301)
-        .json({ status: false, message: "Product not Updated in your Cart" });
+      const add = await CartProducts.create({ userId, productId, quantiy: 1 });
+      if (!add) {
+        return res
+          .status(301)
+          .json({ status: false, message: "Product not Updated in your Cart" });
+      }
+
+      return res
+        .status(201)
+        .json({ status: true, message: "Product Added to your cart." });
     }
+    return res
+        .status(200)
+        .json({ status: true, message: "Product Quantity Updated in your cart." });
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: false, message: "Internal Serevr Error" });
