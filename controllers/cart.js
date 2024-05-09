@@ -99,17 +99,19 @@ const getAllItems = async (req, res) => {
 
 const deleteFromCart = async (req, res) => {
   try {
-    const cartItemId = req.params.cartItemId;
-
-    // Check if cartItemId is provided
-    if (!cartItemId) {
-      return res
-        .status(400)
-        .json({ status: false, message: "Cart item ID is required." });
-    }
+    const { userId, productId } = req.params;
 
     // Find the cart item by ID and delete it
-    const deletedCartItem = await CartProducts.findByIdAndDelete(cartItemId);
+    if (!userId || !productId) {
+      return res
+        .status(400)
+        .json({ status: false, message: "User id or Product is missing." });
+    }
+
+    const deletedCartItem = await CartProducts.findOneAndDelete({
+      userId,
+      productId,
+    });
 
     // Check if the cart item exists
     if (!deletedCartItem) {
@@ -148,19 +150,19 @@ const decreseItem = async (req, res) => {
 
     // Check if the cart item exists
     if (!updatedCartItem) {
-      return res
-        .status(404)
-        .json({
-          status: false,
-          message: "Cart item not found.",
-          updatedCartItem,
-        });
+      return res.status(404).json({
+        status: false,
+        message: "Cart item not found.",
+        updatedCartItem,
+      });
     }
 
     // If quantity becomes 0 after decrement, delete the cart item
     if (updatedCartItem.quantity === 0) {
       await CartProducts.findByIdAndDelete(updatedCartItem._id);
-      return res.status(200).json({ status: true, message: "Cart item deleted successfully." });
+      return res
+        .status(200)
+        .json({ status: true, message: "Cart item deleted successfully." });
     }
 
     // If everything is successful, return the updated cart item
@@ -172,6 +174,5 @@ const decreseItem = async (req, res) => {
 };
 
 module.exports = { decreseItem };
-
 
 module.exports = { add_To_Cart, deleteFromCart, getAllItems, decreseItem };
