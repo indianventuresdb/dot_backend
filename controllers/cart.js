@@ -173,6 +173,28 @@ const decreseItem = async (req, res) => {
   }
 };
 
+const deleteCartDataByUserId = async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    // Delete all cart data where userId matches
+    await CartProducts.deleteMany({ userId: userId });
+
+    // Send a success response
+    res.status(200).json({ message: "Cart data deleted successfully" });
+  } catch (error) {
+    // Handle errors
+    console.error("Error deleting cart data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = { decreseItem };
 
-module.exports = { add_To_Cart, deleteFromCart, getAllItems, decreseItem };
+module.exports = {
+  add_To_Cart,
+  deleteFromCart,
+  getAllItems,
+  decreseItem,
+  deleteCartDataByUserId,
+};
