@@ -243,7 +243,8 @@ exports.verifyPayment = async (req, res) => {
     }
 
     res.redirect(
-      process.env.FRONTEND + `/success?tranactionId=${transactionId}`
+      process.env.FRONTEND +
+        `/success?transactionId=${transactionId}&orderId=${orderId}`
     );
   } else {
     res.redirect(process.env.FRONTEND + `/unsuccess?orderId=${orderId}`);
