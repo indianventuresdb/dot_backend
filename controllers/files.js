@@ -75,9 +75,9 @@
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// const path = require("path");
-// const fs = require("fs");
-// const sharp = require("sharp");
+const path = require("path");
+const fs = require("fs");
+const sharp = require("sharp");
 
 // exports.downloadImageController = async (req, res) => {
 //   const fileName = req.params.fileName;
