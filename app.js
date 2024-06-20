@@ -26,6 +26,7 @@ const who_i_am = require("./routes/who_i_am.js");
 const { Slides } = require("./models/slider.js");
 const multer = require("multer");
 const tagsRouter = require("./routes/tags.js");
+const postRouter = require("./routes/postTrackerRoute.js");
 
 // dot env configuration
 dotenv.config();
@@ -69,6 +70,9 @@ const upload = multer({ storage, fileFilter });
 
 // Use the user router
 app.use("/api/v1/indentifier", who_i_am);
+
+// Use the user router
+app.use("/api/v1/post", postRouter);
 
 // Use the user router
 app.use("/api/v1/user", userRouter);
