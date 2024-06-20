@@ -3,6 +3,7 @@ const Posts = require("../models/post");
 // Controller to handle adding new post data
 const addData = async (req, res) => {
   try {
+    console.log("request body", req.body);
     const { ref, id, patha, postDate, userAgent } = req.body;
 
     // Create a new post instance with data from the request body
