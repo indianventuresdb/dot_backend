@@ -10,7 +10,7 @@ const posts = new mongoose.Schema(
       type: String,
       required: true,
     },
-    patha: {
+    path: {
       type: String,
       required: true,
     },
