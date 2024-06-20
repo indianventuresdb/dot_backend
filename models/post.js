@@ -22,6 +22,10 @@ const posts = new mongoose.Schema(
       type: String,
       required: true,
     },
+    visitors: {
+      type: Number,
+      default: 1,
+    },
   },
   { timestamps: true }
 );
