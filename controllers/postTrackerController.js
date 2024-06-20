@@ -1,8 +1,10 @@
 const { Posts } = require("../models/post");
 
 const addData = async (req, res) => {
+  let userAgent;
+
   try {
-    const userAgent = req.get("User-Agent");
+    userAgent = req.get("User-Agent");
     const { ref, id, path, postDate } = req.body;
 
     const post = await Posts.findOne({ id });
