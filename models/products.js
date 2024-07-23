@@ -10,6 +10,15 @@ const products = new mongoose.Schema(
       type: String,
       required: true,
     },
+    seoTitle: {
+      type: String,
+    },
+    seoDescription: {
+      type: String,
+    },
+    seoKeywords: {
+      type: [String],
+    },
     size: {
       type: String,
     },
@@ -83,7 +92,7 @@ const products = new mongoose.Schema(
     },
     backgroundColor: {
       type: String,
-      default: "#FFFFFF"
+      default: "#FFFFFF",
     },
     productVideo: {
       type: String,
